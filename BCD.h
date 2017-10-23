@@ -201,11 +201,27 @@ class BCD {
    // Functions called: None
    const bool isLastNode();
 
-   // toString() - To return a string representation of the BCD object.
-   // Parameters: returnString - Used to concatenate successive decimals from the linked nodes.
+   // insertMSD() - Inserts a node at the Most Significant Digit position
+   // Parameters: someData - Used to populate the new node's data field.
    // Preconditions: None
-   // Postconditions: None
-   // Return value: A string of undefined length, preceded by a "+" or "-" sign
+   // Postconditions: A new node is inserted as the the least significant digit position in the BCD
+   // Return value: None
+   // Functions called: None
+   const void BCD::insertMSD(int someData);
+
+   // insertLSD() - Inserts a node at the Least Significant Digit position
+   // Parameters: someData - Used to populate the new node's data field.
+   // Preconditions: None
+   // Postconditions: A new node is inserted as the the least significant digit position in the BCD
+   // Return value: None
+   // Functions called: None
+   const void BCD::insertLSD(int someData);
+
+   // toString() - To return a string representation of the BCD object.
+   // Parameters: someData - Used to populate the new node's data field.
+   // Preconditions: None
+   // Postconditions: A new node is inserted as the the most significant digit position in the BCD
+   // Return value: None
    // Functions called: None
    const string toString();
 
