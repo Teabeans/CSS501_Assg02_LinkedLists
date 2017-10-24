@@ -125,43 +125,44 @@ class BCD {
    // Invariant information: Range is from 0 to the maximimum value of an int (2,147,483,647)
    int length;
 
-   // isPositive: For the head node only.
-   // Invariant information:
+   // isPositive: Represents whether this BCD object is positive or not
+   // Invariant information: 
    bool isPositive;
 
-   // prevBCD: A BCD address. Points to the Most Significant Digit (MSD) if this node is the head, points to next least significant digit (LSD) if not.
-   // Invariant information: 
-   BCD* prevBCD; // Type is a BCD address. Must assign it &someBCD
 
-   // nextBCD: A BCD address. Points to LSD if this node is the head, points to next most significant digit if not.
-   // Invariant information:
-   BCD* nextBCD; // Type is a BCD address. Must assign it &someBCD
-
-   // headBCD: A BCD address. Points to the head of this node's number string.
-   // Invariant information:
-   BCD* headBCD;
-
-   // value: An integer representing the numeric digit stored at this position. Value is Null for head.
-   // Invariant information: Value is in range from 0 to 9.
-   int value;
-
-   // carry: An integer representing whether this node has received a carry during an addition operation. (i.e. In "2-3" + "8", node "2" will receive a carry)
-   // Invariant information: Value is always 0 when no algebraic operation is being performed.
-   int carry;
-
-   // borrow: An integer representing whether this node has provided a borrow during a subtraction operation.
-   // Invariant information: Value is always 0 when no algebraic operation is being performed.
-   int borrow;
 
    // PRIVATE METHODS:
-
 
    // --- PUBLIC REGION --- PUBLIC REGION --- PUBLIC REGION ---
    public:
 
-   struct Node;
-
    // PUBLIC FIELDS:
+   // BCDnode: Structure representing a BCDnode
+   // Invariant information:
+   struct BCDnode {
+      //Fields go here
+      string nodeName;
+      int data;
+      int borrow;
+      int carry;
+      BCDnode* moreSDptr;
+      BCDnode* lessSDptr;
+      // Default node constructor
+      BCDnode() : nodeName("Head Node"), data(NULL), moreSDptr(nullptr), lessSDptr(nullptr) { }
+      // Post-condition: Node exists with no data, next and prev pointers do not indicate anything.
+
+      // Node constructor using a value and the pointers for its adjacent nodes
+      BCDnode(int someData, BCDnode* moreSigDigit, BCDnode* lessSigDigit) :
+         nodeName("Body Node"),
+         data(someData),
+         moreSDptr(moreSigDigit),
+         lessSDptr(lessSigDigit) {
+      }
+   };
+
+   // headptr: Pointer to the head BCDnode
+   // Invariant information:
+   BCDnode* headptr;
 
    // PUBLIC METHODS:
 
@@ -188,7 +189,7 @@ class BCD {
    // Postconditions: A BCD object is created with an internal state identical to but distinct from the received BCD argument.
    // Return value: None
    // Functions called: None
-   BCD(const BCD&);
+   BCD(const BCD& someBCD);
 
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
@@ -244,6 +245,15 @@ class BCD {
    // If it's in the class definition, include 'friend'
    friend ostream& operator<<(ostream& coutStream, BCD& someBCD);
 
+   // + - Custom behavior for the addition operator when dealing with a BCD object (left) and a BCD object (right)
+   // Parameters: term1BCD - The original BCD object being added to ; term2BCD - The BCD number being added to the term1BCD.
+   // Preconditions: None
+   // Postconditions: A new BCD object exists representing the summed addition of the old BCD and received BCD.
+   // Return value: A new BCD object representing the summed addition
+   // Functions called: BCD::BCD(int) - Converts an int to a BCD object
+   friend BCD operator+(BCD& term1BCD, BCD& term2BCD);
+
+//   friend const BCD& operator=(const BCD& someBCD);
 
    // ---- DESTRUCTORS -----
    ~BCD();
