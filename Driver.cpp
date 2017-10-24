@@ -8,12 +8,14 @@ int main() {
    int b = 975;
    
    BCD n1;
-   cout << n1 << endl;
-/*   BCD n2(a);
+   cout << "Start N1 " << n1 << endl;
+   BCD n2(a);
+   cout << "Start N2 " << n2 << endl;
 
    cout << "Converted 125 (int) to " << n2 << " BCD" << endl;
-
-   n1 = n2 + b;
+   n2 + n1;
+   //n1 = n2 + b;
+   /*
    cout << n2 << " + 975 (int) = " << n1 << endl;
 
    cin >> n2;
