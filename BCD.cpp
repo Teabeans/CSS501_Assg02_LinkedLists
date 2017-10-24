@@ -118,7 +118,6 @@
 // ---- NAMESPACE STATEMENTS ----
 using namespace std;
 
-
 // ---- STRUCTS ----
 
 struct BCDnode {
@@ -130,27 +129,17 @@ struct BCDnode {
       BCDnode* moreSDptr; // Node pointer to the next more significant digit (next)
       BCDnode* lessSDptr; // Node pointer to the next least significant digit (prev)
 
-      // Default node constructor
-      BCDnode( ) : nodeName("Head Node"), data(NULL), moreSDptr(nullptr), lessSDptr(nullptr) { }
-      // Post-condition: Node exists with no data, next and prev pointers do not indicate anything.
 
-      // Node constructor using a value and the pointers for its adjacent nodes
-      BCDnode(int someData, BCDnode* moreSigDigit, BCDnode* lessSigDigit) :
-         nodeName("Body Node"),
-         data(someData),
-         moreSDptr(moreSigDigit),
-         lessSDptr(lessSigDigit)
-         {
-         // NEEDS TO BE PERFORMED AFTER THIS NODE IS CREATED   moreSigDigit->lessSDptr = thisDigit; // Set backpointer - Dereference the moreSigDigit pointer and acquire that Node's lessSDptr
-         // NEEDS TO BE PERFORMED AFTER THIS NODE IS CREATED   lessSigDigit->moreSDptr = thisDigit; // <Set backpointer>
-      }
+
+
    }; // Closing 'struct Node'
 
 // Note: Fields can be initialized in EITHER the .h or the .cpp
+
 // ---- FIELDS ----
 BCDnode* headptr;
-bool isPositive; // Sign to determine whether this BCD is positive or negative
-int length;
+bool isPositive = true; // Sign to determine whether this BCD is positive or negative
+int length = 1;
 
 // ---- CONSTRUCTORS ----
 // BCD::BCD() - Constructs a new BCD with a value of "0"
@@ -164,14 +153,18 @@ BCD::BCD( ) { // By default, the node pointer (BCDnode*) named 'head' is initial
 
 // BCD::BCD(int someInt) - Constructs a new BCD with an equivalent value to the received argument int
 BCD::BCD(int someInt) {
+   // Make the head node
    headptr = new BCDnode();
-   BCDnode* body = new BCDnode((someInt% 10), headptr, headptr); // Generates new node with value of the LSD of the int passed, headptr set to both 'next' and 'prev'
+   // Generates new node with value of the LSD of the int passed, headptr set to both 'next' and 'prev'
+   BCDnode* body = new BCDnode((someInt % 10), headptr, headptr);
    headptr->lessSDptr = body;
    headptr->moreSDptr = body;
-   someInt / 10;
+   someInt = someInt / 10;
+
    while (someInt > 0) {
       insertMSD(someInt % 10); // Remainder of the int when divided by 10 is always the least significant digit
-      someInt / 10;
+      someInt = someInt / 10;
+      cout << someInt << endl;
       // 1234 % 10 = 4
       // '4'
       // 123 % 10 = 3
@@ -182,10 +175,11 @@ BCD::BCD(int someInt) {
       // '1-2-3-4'
       // 0 - Loop breaks
    }
+   
 }
 
 // BCD::BCD(const BCD&) - Constructs a new BCD that is a deep copy of the received argument BCD reference
-BCD::BCD(const BCD&) {
+BCD::BCD(const BCD& someBCD) {
    // <IMPLEMENTATION GOES IN HERE>
    // To copy a structure:
    //BCDnode originalNode;
@@ -235,6 +229,40 @@ ostream& operator<< (ostream& coutStream, BCD& someBCD) { // where 'cinData' is 
    coutStream << thisBCDNumber;
    return coutStream;
 }
+
+// + - Custom behavior for the addition operator when dealing with a BCD object (left) and a BCD object (right)
+// Parameters: term1BCD - The original BCD object being added to ; term2BCD - The BCD number being added to the term1BCD.
+// Preconditions: None
+// Postconditions: A new BCD object exists representing the summed addition of the old BCD and received BCD.
+// Return value: A new BCD object representing the summed addition
+// Functions called: BCD::BCD(int) - Converts an int to a BCD object
+BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
+   // Term1BCD exists
+   // Term2BCD exists
+   cout << "Wheeee!" << endl;
+   BCD sumBCD; // Generate a sumBCD with value set to 0.
+   // < Implement addition logic here >
+   // Step 1, set current for all BCDs to Least SigDigit
+   // currT1 = term1BCD.headptr->moreSDptr;
+   // currT2 = term2BCD.headptr->moreSDptr;
+   // currSum = sumBCD.headptr->moreSDptr;
+
+   return sumBCD;
+}
+
+//const BCD& operator=(const BCD&) {
+// Test that "this != RightHandArgument" - If same, you'll end up deleting the thing, then filling it with its deleted self
+// So if the test fails, we don't proceed any further and nothing happens (break)
+// < Needs a
+// clear() then
+// copy() call - Recommend breaking out clear() and copy() to simplify code, gets reused during constructors and destructors
+// Because the thing you're overwriting needs to be deallocated and emptied out before you attempt to replace it
+// return(*this); // We need this line?
+//}
+
+// TODO: Implement copy() - Deep copy of all nodes
+
+// TODO: Implement clear() - Deletes all nodes and deallocates memory
 
 // isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
 // Parameters: No internal fields
@@ -295,52 +323,20 @@ const void BCD::insertLSD(int someData) {
 const string BCD::toString() {
    //	cout << "Begin toString()" << endl; // DEBUG
    string returnString = "toString() test string: ";
-   returnString += headptr->nodeName; // Append the headptr dereference's nodeName to the returnString
-   returnString += headptr->lessSDptr->nodeName;
-   returnString += std::to_string(headptr->lessSDptr->data);
+
+   // Append the headptr dereference's nodeName to the returnString.
+   // returnString += headptr->nodeName;
+   // Append the first body pointer's nodeName to the returnString
+   // returnString += headptr->lessSDptr->nodeName;
+
+   // Set the current node to the Most SigDigit
+   BCDnode* currentNodeptr = headptr->lessSDptr;
+   // While currentNodeptr is *not* back on the head...
+   while (currentNodeptr != headptr) {
+      // Append the actual data to the returnString
+      returnString += std::to_string(currentNodeptr->data);
+      // And move the current node to the next Less SigDigit
+      currentNodeptr = currentNodeptr->lessSDptr;
+   }
    return returnString;
 }
-/*
-// ---- GLOBAL VARIABLES ----
-// - PROHIBITED FOR THIS COURSE -
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-// ---- METHODS ----
-
-// insertMSD() - Inserts a node at the Most Significant Digit position
-
-// insertLSD() - Inserts a node at the Least Significant Digit position
-
-// removeMSD() - Removes a node at the Most Significant Digit position
-
-// removeLSD() - Removes a node at the Least Significant Digit position
-
-
-
-// toString() - To return a string representation of the decoded PunchCard.
-// Parameters: returnString - Used to concatenate successive characters from the outputArray.
-// Preconditions: None
-// Postconditions: returnString is 80 characters in length, plus a newline character at its end.
-// Return value: A string, 80 characters in length, with a newline character at its end.
-// Functions called: None
-const string BCD::toString() {
-   //	cout << "Begin toString()" << endl; // DEBUG
-   string returnString = "";
-   return returnString;
-}
-
-// }*/
