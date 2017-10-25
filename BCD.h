@@ -194,6 +194,10 @@ public:
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
 
+   void BCD::clear(BCDnode* headStart);
+
+   void BCD::remove(BCDnode* target);
+
    BCD const add(const BCD& term2BCD);
 
    BCD const subtract(const BCD& term2BCD);
@@ -256,6 +260,8 @@ public:
    // Return value: A new BCD object representing the summed addition
    // Functions called: BCD::BCD(int) - Converts an int to a BCD object
    friend BCD operator+(BCD& term1BCD, BCD& term2BCD);
+
+   friend BCD operator-(BCD& term1BCD, BCD& term2BCD);
 
    //   friend const BCD& operator=(const BCD& someBCD);
 
