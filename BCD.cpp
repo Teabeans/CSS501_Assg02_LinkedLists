@@ -145,7 +145,7 @@ int length = 1;
 // BCD::BCD() - Constructs a new BCD with a value of "0"
 // "In the BCD namespace, method named BCD receiving (<no arguments>), initializing 'head' to 'nullptr' and executing {<no commands>}
 BCD::BCD() { // By default, the node pointer (BCDnode*) named 'head' is initialized to nullptr
-   
+
    headptr = new BCDnode();
    BCDnode* body = new BCDnode(0, headptr, headptr); // Generates new node with value of 0, headptr set to both 'next' and 'prev'
    headptr->lessSDptr = body;
@@ -264,6 +264,41 @@ BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
    return sumBCD;
 }
 
+// - - Custom behavior for the subtraction operator when dealing with a BCD object (left) and a BCD object (right)
+// Parameters: term1BCD - The original BCD object being subtracted from ; term2BCD - The BCD number being subtracted from term1BCD.
+// Preconditions: None
+// Postconditions: A new BCD object exists representing the difference of the old BCD and received BCD.
+// Return value: A new BCD object representing the difference from subtraction
+// Functions called: BCD::BCD(int) - Converts an int to a BCD object
+BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
+
+   cout << "Starting operator-()" << term1BCD.toString() << term2BCD.toString() << endl;
+   BCD diffBCD; // Generate a sumBCD with value set to 0.
+               // < Implement addition logic here >
+               // Step 1, set current for all BCDs to Least SigDigit
+               // currT1 = term1BCD.headptr->moreSDptr;
+               // currT2 = term2BCD.headptr->moreSDptr;
+               // currSum = sumBCD.headptr->moreSDptr;
+   diffBCD = term1BCD.subtract(term2BCD);
+/*   if (term1BCD.isPositive && term2BCD.isPositive || !term1BCD.isPositive && !term2BCD.isPositive) {
+      cout << "Both terms are positive or both are negative, so subtract()" << endl;
+      diffBCD = term1BCD.subtract(term2BCD);
+   }
+/*   else if (term1BCD.isPositive && !term2BCD.isPositive || !term1BCD.isPositive && term2BCD.isPositive) {
+      cout << "The terms are a mix of positive and negative, so add()" << endl;
+      // Determine which is greater, send that first
+      // Determine final sign, reserve it
+      bool reserveSign = true;
+      diffBCD = term1BCD.add(term2BCD);
+      diffBCD.isPositive = reserveSign;
+   }
+   else {
+      diffBCD = term1BCD.add(term2BCD);
+   }
+   */
+   return diffBCD;
+}
+
 // = - Custom behavior for the assignment operator when dealing with a BCD object (left) and a BCD object (right)
 // Parameters: oldBCD - The original BCD object being overwritten ; newBCD - The BCD number being assigned.
 // Preconditions: None
@@ -304,34 +339,74 @@ return sumBCD;
 
 // TODO: Implement copy() - Deep copy of all nodes
 
-// TODO: Implement clear() - Deletes all nodes and deallocates memory
 
-// TODO: Implement add(BCD, BCD)
+// clear() - Deletes all nodes linked to the specified headnode and deallocates memory
+// Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
+// Preconditions: None
+// Postconditions: None
+// Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
+// Functions called: None
+void BCD::clear(BCDnode* headStart) {
+   cout << "Start clear(): " << endl;
+}
+
+// remove() - Deletes a specified node, deallocates memory, and redirects relevant pointers
+// Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
+// Preconditions: None
+// Postconditions: None
+// Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
+// Functions called: None
+void BCD::remove(BCDnode* target) {
+   cout << "Start remove(): " << endl;
+   // Step 1: Locate the node to remove
+   // Complete: Passed in via "Target"
+
+   // Step 2: Disconnect node from the linked list by manipulating the relevant pointers
+   cout << "Redirecting pointers around target" << endl;
+   target->moreSDptr->lessSDptr = target->lessSDptr;
+   target->lessSDptr->moreSDptr = target->moreSDptr;
+
+   // Zero out node data fields (for tidiness and security!):
+   cout << "Erasing node fields: " << target->nodeName << ":" << target->data << ":" << target->borrow << ":" << target->carry << ":" << target->moreSDptr << ":" << target->lessSDptr << endl;
+   target->nodeName.clear();
+   target->data = NULL;
+   target->borrow = NULL;
+   target->carry = NULL;
+   target->moreSDptr = nullptr;
+   target->lessSDptr = nullptr;
+
+   // Step 3: Return the node to the system
+   delete target;
+}
+
+// add() - Adds a BCD object to another BCD object
+// Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
+// Preconditions: None
+// Postconditions: None
+// Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
+// Functions called: None
 BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method location before 'this' becomes available for use
    cout << "Starting add()" << endl;
-   cout << this->toString();
-   cout << term2BCD.toString();
-   cout << "term1, node1: " << (*this).headptr->moreSDptr->data << endl; // 'this' is a pointer - Access by dereferencing to a BCD.
-   cout << "term2, node1: " << term2BCD.headptr->moreSDptr->data << endl; // term2BCD is a BCD - Access with . notation
-   //int sum = (this.headptr->moreSDptr->data) + (term2BCD.headptr->moreSDptr->data);
+
    int sum = 0;
    int addCarry = 0;
    BCD sumBCD;
-   int iteration = 0;
    bool terminate = false;
-   BCDnode* T1curr = this->headptr->moreSDptr; // Set T1 current to term1's first node
-   BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current to term2's first node
-   BCDnode* sumcurr = sumBCD.headptr->moreSDptr;
-   cout << "T1curr: " << T1curr->data << endl;
-   cout << "T2curr: " << T2curr->data << endl;
-   cout << "Sumcurr: " << sumcurr->data << endl;
-   cout << "Sumcurr.carry: " << sumcurr->carry << endl;
+
+   BCDnode* T1curr = this->headptr->moreSDptr; // Set T1 current node to term1's first node
+   BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
+   BCDnode* sumcurr = sumBCD.headptr->moreSDptr; // Set the sum current node to sumBCD's first node
+   // cout << "T1curr: " << T1curr->data << endl; // DEBUG
+   // cout << "T2curr: " << T2curr->data << endl; // DEBUG
+   // cout << "Sumcurr: " << sumcurr->data << endl; // DEBUG
+   // cout << "Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
 
    // While both BCDs are not resting at the head node...
    while (terminate == false) {
-      iteration++;
       // Sum the two terms...
       sum = (T1curr->data) + (T2curr->data) + sumcurr->carry;
+      // Carry having been 'used', reset its value to 0
+      sumcurr->carry = 0;
       // If it's 0-9, assign directly to the sumCurrent node's data field
       if (sum < 10) {
          sumcurr->data = sum;
@@ -343,7 +418,7 @@ BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method locati
          // And assign the sum appropriately (carry is performed down below)
          sumcurr->data = sum;
       }
-      cout << "sumcurr data: " << sumcurr->data << endl;
+      // cout << "sumcurr data: " << sumcurr->data << endl; // DEBUG
 
       // Advance T1 current node if it's not back on the head.
       if (T1curr != this->headptr) {
@@ -355,8 +430,8 @@ BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method locati
          T2curr = T2curr->moreSDptr;
       }
 
-      cout << "T1curr: " << T1curr->data << endl;
-      cout << "T2curr: " << T2curr->data << endl;
+      // cout << "T1curr: " << T1curr->data << endl; // DEBUG
+      // cout << "T2curr: " << T2curr->data << endl; // DEBUG
       // Test for exit condition, both T1curr and T2curr are back at the headptr and there is no carry to deal with.
       if (T1curr == this->headptr && T2curr == term2BCD.headptr && addCarry == 0) {
          terminate = true;
@@ -380,10 +455,88 @@ BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method locati
    return(sumBCD);
 }
 
-// TODO: Implement subtract (BCD, BCD)
+// subtract() - Subtracts a BCD object from another BCD object
+// Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
+// Preconditions: The absolute value of the calling BCD must be greater or equal to the absolute value of the argument BCD.
+// Postconditions: A BCD representing the absolute magnitude btween the two BCDs exists. This BCD will be positive.
+// Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
+// Functions called: None
 BCD const BCD::subtract(const BCD& term2BCD) {
-   cout << "This is the subtract() method" << endl;
-   return(term2BCD);
+   cout << "Starting subtract()" << endl;
+
+   int difference = 0;
+   int tempBorrow = 0;
+   BCD diffBCD;
+   bool terminate = false;
+   // Example 1024-123 = 901
+           //  123
+           //  901
+   BCDnode* T1curr = this->headptr->moreSDptr; // Set T1 current node to term1's first node
+   BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
+   BCDnode* diffcurr = diffBCD.headptr->moreSDptr; // Set the sum current node to sumBCD's first node
+   // cout << "T1curr: " << T1curr->data << endl; // DEBUG
+   // cout << "T2curr: " << T2curr->data << endl; // DEBUG
+   // cout << "Sumcurr: " << sumcurr->data << endl; // DEBUG
+   // cout << "Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
+
+   // While both BCDs are not resting at the head node...
+   while (terminate == false) {
+      // Subtract the two terms...
+      difference = (T1curr->data) - (T2curr->data) - diffcurr->borrow;
+      // Borrow having been 'used', reset its value to 0
+      diffcurr->borrow = 0;
+      // If difference is less than 0
+      if (difference < 0) {
+         // add ten and assign result to the diffCurrent node's data field
+         diffcurr->data = difference+10;
+         // But because we had to add ten, increment the borrow on the next node by 1.
+         tempBorrow = 1;
+      }
+      // Otherwise, just assign directly to the result node
+      else {
+         diffcurr->data = difference;
+      }
+
+      // Advance T1 current node if it's not back on the head.
+      if (T1curr != this->headptr) {
+         T1curr = T1curr->moreSDptr;
+      }
+
+      // Advance T2 current node if it's not back on the head.
+      if (T2curr != term2BCD.headptr) {
+         T2curr = T2curr->moreSDptr;
+      }
+
+      // cout << "T1curr: " << T1curr->data << endl; // DEBUG
+      // cout << "T2curr: " << T2curr->data << endl; // DEBUG
+      // Test for exit condition, both T1curr and T2curr are back at the headptr and there is no carry to deal with.
+      if (T1curr == this->headptr && T2curr == term2BCD.headptr && tempBorrow == 0) {
+         terminate = true;
+      }
+      // If they aren't, we're going another round...
+      else {
+         // And the diffBCD will need another node for that.
+         diffBCD.insertMSD(0);
+         // Assign the borrow value to the new node (0 or 1)
+         diffcurr->moreSDptr->borrow = tempBorrow;
+         // Which we then advance to:
+         diffcurr = diffcurr->moreSDptr;
+
+         // And re-zero our working variables so it doesn't muddle additions on the next cycle
+         difference = 0;
+         tempBorrow = 0;
+      }
+   } // Closing while loop
+
+   // Trim the zeroes
+   while (diffBCD.headptr->lessSDptr->data == 0) {
+      diffBCD.remove(diffBCD.headptr->lessSDptr);
+   }
+
+   cout << "difference of T1 and T2: " << diffBCD.toString() << endl;
+   // Send the sumBCD, now complete, back to whatever called this function
+
+   return(diffBCD);
 }
 
 // isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
