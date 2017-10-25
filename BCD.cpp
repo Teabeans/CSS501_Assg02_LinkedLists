@@ -188,16 +188,7 @@ BCD::BCD(const BCD& someBCD) {
 // Destructor
 // TODO: DELETE ALL NODES IN THE BCD! This is where that happens.
 BCD::~BCD() {
-   /*
-   // To create a BCDnode instance:
-   BCDnode *newNode = new BCDnode;
-
-   Node* tempptr;
-   for (; headptr; headptr = tempptr)
-   {
-   tempptr = headptr -> next;
-   delete headptr;
-   } */
+   clear(headptr);
 }
 
 // ----OVERLOADS----
@@ -348,6 +339,16 @@ return sumBCD;
 // Functions called: None
 void BCD::clear(BCDnode* headStart) {
    cout << "Start clear(): " << endl;
+   BCDnode* currTarget = headStart->lessSDptr;
+   // H - 1 - 2 - 3 - 4
+   // Test that the BCD is not empty!
+   while (currTarget != headStart) {
+      remove(currTarget);
+      currTarget = headStart->lessSDptr;
+   }
+   cout << "Body nodes deleted" << endl;
+   cout << "Targeting head in clear()" << endl;
+   remove(headStart);
 }
 
 // remove() - Deletes a specified node, deallocates memory, and redirects relevant pointers
@@ -362,21 +363,39 @@ void BCD::remove(BCDnode* target) {
    // Complete: Passed in via "Target"
 
    // Step 2: Disconnect node from the linked list by manipulating the relevant pointers
-   cout << "Redirecting pointers around target" << endl;
-   target->moreSDptr->lessSDptr = target->lessSDptr;
-   target->lessSDptr->moreSDptr = target->moreSDptr;
+   
+   if (target != this->headptr) {
+      cout << "Redirecting pointers around target" << endl;
+      target->moreSDptr->lessSDptr = target->lessSDptr;
+      target->lessSDptr->moreSDptr = target->moreSDptr;
 
-   // Zero out node data fields (for tidiness and security!):
-   cout << "Erasing node fields: " << target->nodeName << ":" << target->data << ":" << target->borrow << ":" << target->carry << ":" << target->moreSDptr << ":" << target->lessSDptr << endl;
-   target->nodeName.clear();
-   target->data = NULL;
-   target->borrow = NULL;
-   target->carry = NULL;
-   target->moreSDptr = nullptr;
-   target->lessSDptr = nullptr;
+      // Zero out node data fields (for tidiness and security!):
+      cout << "Erasing node fields: " << target->nodeName << ":" << target->data << ":" << target->borrow << ":" << target->carry << ":" << target->moreSDptr << ":" << target->lessSDptr << endl;
+      target->nodeName.clear();
+      target->data = NULL;
+      target->borrow = NULL;
+      target->carry = NULL;
+      target->moreSDptr = nullptr;
+      target->lessSDptr = nullptr;
 
-   // Step 3: Return the node to the system
-   delete target;
+      // Step 3: Return the node to the system
+      delete target;
+   }
+   else {
+      // Zero out node data fields (for tidiness and security!):
+      cout << "Head targeted" << endl;
+      cout << "Erasing node fields: " << target->nodeName << ":" << target->data << ":" << target->borrow << ":" << target->carry << ":" << target->moreSDptr << ":" << target->lessSDptr << endl;
+      target->nodeName.clear();
+      target->data = NULL;
+      target->borrow = NULL;
+      target->carry = NULL;
+      target->moreSDptr = nullptr;
+      target->lessSDptr = nullptr;
+
+      // Step 3: Return the node to the system
+      delete target;
+      cout << "Head removed!" << endl;
+   }
 }
 
 // add() - Adds a BCD object to another BCD object
