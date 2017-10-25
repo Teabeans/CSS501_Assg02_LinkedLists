@@ -4,16 +4,16 @@
 using namespace std;
 
 int main() {
-   int a = 125;
-   int b = 975;
-   
-   BCD n1;
+   int a = 123;
+   int b = 876;
+
+   BCD n1(a);
    cout << "Start N1 " << n1 << endl;
-   BCD n2(a);
+   BCD n2(b);
    cout << "Start N2 " << n2 << endl;
 
    cout << "Converted 125 (int) to " << n2 << " BCD" << endl;
-   n2 + n1;
+   n1 + n2;
    //n1 = n2 + b;
    /*
    cout << n2 << " + 975 (int) = " << n1 << endl;
