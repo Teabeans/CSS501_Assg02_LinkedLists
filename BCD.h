@@ -142,13 +142,13 @@ public:
    struct BCDnode {
       //Fields go here
       string nodeName;
-      int data;
-      int borrow;
-      int carry;
+      int data = 0;
+      int borrow = 0;
+      int carry = 0;
       BCDnode* moreSDptr;
       BCDnode* lessSDptr;
       // Default node constructor
-      BCDnode() : nodeName("Head Node"), data(NULL), moreSDptr(nullptr), lessSDptr(nullptr) { }
+      BCDnode() : nodeName("Head Node"), data(0), moreSDptr(nullptr), lessSDptr(nullptr) { }
       // Post-condition: Node exists with no data, next and prev pointers do not indicate anything.
 
       // Node constructor using a value and the pointers for its adjacent nodes
@@ -194,9 +194,9 @@ public:
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
 
-   BCD add(BCD& term2BCD);
+   BCD const add(const BCD& term2BCD);
 
-   BCD subtract(BCD& term2BCD);
+   BCD const subtract(const BCD& term2BCD);
 
    // isLastCard() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
    // Parameters: No internal fields
@@ -228,7 +228,7 @@ public:
    // Postconditions: A new node is inserted as the the most significant digit position in the BCD
    // Return value: None
    // Functions called: None
-   const string toString();
+   const string toString() const;
 
    // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a PunchCard object (right)
    // Parameters: thisLine - Used to store successive lines of data from cin.
