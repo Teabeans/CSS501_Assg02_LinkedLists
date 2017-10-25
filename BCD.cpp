@@ -123,7 +123,7 @@ using namespace std;
 struct BCDnode {
    // Fields: Node fields
    string nodeName = "";
-   int data = NULL;
+   int data = 0;
    int borrow = 0;
    int carry = 0;
    BCDnode* moreSDptr; // Node pointer to the next more significant digit (next)
@@ -145,6 +145,7 @@ int length = 1;
 // BCD::BCD() - Constructs a new BCD with a value of "0"
 // "In the BCD namespace, method named BCD receiving (<no arguments>), initializing 'head' to 'nullptr' and executing {<no commands>}
 BCD::BCD() { // By default, the node pointer (BCDnode*) named 'head' is initialized to nullptr
+   
    headptr = new BCDnode();
    BCDnode* body = new BCDnode(0, headptr, headptr); // Generates new node with value of 0, headptr set to both 'next' and 'prev'
    headptr->lessSDptr = body;
@@ -239,7 +240,7 @@ BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
                                               // Term2BCD exists
 
 
-   cout << "Wheeee!" << endl;
+   cout << "Wheeee!" << term1BCD.toString() << term2BCD.toString() << endl;
    BCD sumBCD; // Generate a sumBCD with value set to 0.
                // < Implement addition logic here >
                // Step 1, set current for all BCDs to Least SigDigit
@@ -247,12 +248,13 @@ BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
                // currT2 = term2BCD.headptr->moreSDptr;
                // currSum = sumBCD.headptr->moreSDptr;
    if (term1BCD.isPositive && term2BCD.isPositive) {
+      cout << "Both terms are positive, so add()" << endl;
       sumBCD = term1BCD.add(term2BCD);
    }
    else if (term1BCD.isPositive && !term2BCD.isPositive || !term1BCD.isPositive && term2BCD.isPositive) {
       // Determine which is greater, send that first
       // Determine final sign, reserve it
-      bool reserveSign;
+      bool reserveSign = true;
       sumBCD = term1BCD.subtract(term2BCD);
       sumBCD.isPositive = reserveSign;
    }
@@ -270,23 +272,23 @@ BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
 // Functions called: BCD::BCD(int) - Converts an int to a BCD object
 /*
 BCD operator=(BCD& oldBCD, BCD& newBCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
-                                              // Term1BCD exists
-                                              // Term2BCD exists
-   if oldBCD.headptr == newBCD.headptr{
-      // < These are the same thing
-      // break;
-   }
-   cout << "Wheeee!" << endl;
-   BCD sumBCD; // Generate a sumBCD with value set to 0.
-               // < Implement addition logic here >
-               // Step 1, set current for all BCDs to Least SigDigit
-               // currT1 = term1BCD.headptr->moreSDptr;
-               // currT2 = term2BCD.headptr->moreSDptr;
-               // currSum = sumBCD.headptr->moreSDptr;
-   BCD::BCDnode* T1Curr = term1BCD.headptr->lessSDptr;
-   BCD::BCDnode* T2Curr = term1BCD.headptr->lessSDptr;
-   BCD::BCDnode* sumCurr = sumBCD.headptr->lessSDptr;
-   return sumBCD;
+// Term1BCD exists
+// Term2BCD exists
+if oldBCD.headptr == newBCD.headptr{
+// < These are the same thing
+// break;
+}
+cout << "Wheeee!" << endl;
+BCD sumBCD; // Generate a sumBCD with value set to 0.
+// < Implement addition logic here >
+// Step 1, set current for all BCDs to Least SigDigit
+// currT1 = term1BCD.headptr->moreSDptr;
+// currT2 = term2BCD.headptr->moreSDptr;
+// currSum = sumBCD.headptr->moreSDptr;
+BCD::BCDnode* T1Curr = term1BCD.headptr->lessSDptr;
+BCD::BCDnode* T2Curr = term1BCD.headptr->lessSDptr;
+BCD::BCDnode* sumCurr = sumBCD.headptr->lessSDptr;
+return sumBCD;
 }
 */
 
@@ -305,16 +307,83 @@ BCD operator=(BCD& oldBCD, BCD& newBCD) { // where 'someInt' is the input variab
 // TODO: Implement clear() - Deletes all nodes and deallocates memory
 
 // TODO: Implement add(BCD, BCD)
-BCD add(BCD& term2BCD) {
-   cout << "term1, node1: " << BCD::this->
-   cout << "term2, node1: " << term2BCD.headptr->moreSDptr->data << endl;
-   int sum = (this.headptr->moreSDptr->data) + (term2BCD.headptr->moreSDptr->data);
-   cout << "sum of T1N1 and T2N1: " << sum << endl;
-   return term2BCD;
-}
-// TODO: Implement subtract (BCD, BCD)
-BCD subtract(BCD& term1BCD, BCD& term2BCD) {
+BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method location before 'this' becomes available for use
+   cout << "Starting add()" << endl;
+   cout << this->toString();
+   cout << term2BCD.toString();
+   cout << "term1, node1: " << (*this).headptr->moreSDptr->data << endl; // 'this' is a pointer - Access by dereferencing to a BCD.
+   cout << "term2, node1: " << term2BCD.headptr->moreSDptr->data << endl; // term2BCD is a BCD - Access with . notation
+   //int sum = (this.headptr->moreSDptr->data) + (term2BCD.headptr->moreSDptr->data);
+   int sum = 0;
+   int addCarry = 0;
+   BCD sumBCD;
+   int iteration = 0;
+   bool terminate = false;
+   BCDnode* T1curr = this->headptr->moreSDptr; // Set T1 current to term1's first node
+   BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current to term2's first node
+   BCDnode* sumcurr = sumBCD.headptr->moreSDptr;
+   cout << "T1curr: " << T1curr->data << endl;
+   cout << "T2curr: " << T2curr->data << endl;
+   cout << "Sumcurr: " << sumcurr->data << endl;
+   cout << "Sumcurr.carry: " << sumcurr->carry << endl;
 
+   // While both BCDs are not resting at the head node...
+   while (terminate == false) {
+      iteration++;
+      // Sum the two terms...
+      sum = (T1curr->data) + (T2curr->data) + sumcurr->carry;
+      // If it's 0-9, assign directly to the sumCurrent node's data field
+      if (sum < 10) {
+         sumcurr->data = sum;
+      }
+      // Otherwise, separate out the tens and ones to different variables
+      else {
+         addCarry = sum / 10;
+         sum = sum % 10;
+         // And assign the sum appropriately (carry is performed down below)
+         sumcurr->data = sum;
+      }
+      cout << "sumcurr data: " << sumcurr->data << endl;
+
+      // Advance T1 current node if it's not back on the head.
+      if (T1curr != this->headptr) {
+         T1curr = T1curr->moreSDptr;
+      }
+
+      // Advance T2 current node if it's not back on the head.
+      if (T2curr != term2BCD.headptr) {
+         T2curr = T2curr->moreSDptr;
+      }
+
+      cout << "T1curr: " << T1curr->data << endl;
+      cout << "T2curr: " << T2curr->data << endl;
+      // Test for exit condition, both T1curr and T2curr are back at the headptr and there is no carry to deal with.
+      if (T1curr == this->headptr && T2curr == term2BCD.headptr && addCarry == 0) {
+         terminate = true;
+      }
+      // If they aren't, we're going another round...
+      else {
+         // And the sumBCD will need another node for that.
+         sumBCD.insertMSD(0);
+         sumcurr->moreSDptr->carry = addCarry;
+         // Which we then advance to:
+         sumcurr = sumcurr->moreSDptr;
+
+         // And re-zero our working variables so it doesn't muddle additions on the next cycle
+         sum = 0;
+         addCarry = 0;
+      }
+   } // Closing while loop
+
+   cout << "sum of T1 and T2: " << sumBCD.toString() << endl;
+   // Send the sumBCD, now complete, back to whatever called this function
+   return(sumBCD);
+}
+
+// TODO: Implement subtract (BCD, BCD)
+BCD const BCD::subtract(const BCD& term2BCD) {
+   cout << "This is the subtract() method" << endl;
+   return(term2BCD);
 }
 
 // isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
@@ -373,9 +442,9 @@ const void BCD::insertLSD(int someData) {
 // Postconditions: returnString is 80 characters in length, plus a newline character at its end.
 // Return value: A string, 80 characters in length, with a newline character at its end.
 // Functions called: None
-const string BCD::toString() {
+const string BCD::toString() const {
    //	cout << "Begin toString()" << endl; // DEBUG
-   string returnString = "toString() test string: ";
+   string returnString = "Start toString(): ";
 
    // Append the headptr dereference's nodeName to the returnString.
    // returnString += headptr->nodeName;
