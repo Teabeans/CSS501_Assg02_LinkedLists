@@ -116,7 +116,7 @@ using namespace std;
 
 class BCD {
    // --- PRIVATE REGION --- PRIVATE REGION --- PRIVATE REGION ---
-   private:
+private:
 
    // PRIVATE FIELDS:
    // ---- FIELDS ----
@@ -134,7 +134,7 @@ class BCD {
    // PRIVATE METHODS:
 
    // --- PUBLIC REGION --- PUBLIC REGION --- PUBLIC REGION ---
-   public:
+public:
 
    // PUBLIC FIELDS:
    // BCDnode: Structure representing a BCDnode
@@ -193,6 +193,10 @@ class BCD {
 
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
+
+   BCD add(BCD& term2BCD);
+
+   BCD subtract(BCD& term2BCD);
 
    // isLastCard() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
    // Parameters: No internal fields
@@ -253,7 +257,7 @@ class BCD {
    // Functions called: BCD::BCD(int) - Converts an int to a BCD object
    friend BCD operator+(BCD& term1BCD, BCD& term2BCD);
 
-//   friend const BCD& operator=(const BCD& someBCD);
+   //   friend const BCD& operator=(const BCD& someBCD);
 
    // ---- DESTRUCTORS -----
    ~BCD();
