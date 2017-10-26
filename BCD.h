@@ -194,11 +194,11 @@ public:
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
 
-   void BCD::clear(BCDnode* headStart);
+   void BCD::obliterate(BCDnode* headStart);
 
    void BCD::remove(BCDnode* target);
 
-   BCD const add(const BCD& term2BCD);
+   BCD const add(const BCD& term2BCD) const;
 
    BCD const subtract(const BCD& term2BCD);
 
@@ -233,6 +233,8 @@ public:
    // Return value: None
    // Functions called: None
    const string toString() const;
+
+   const BCD& BCD::operator=(const BCD& someBCD) ;
 
    // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a PunchCard object (right)
    // Parameters: thisLine - Used to store successive lines of data from cin.
