@@ -145,7 +145,7 @@ int length = 1;
 // BCD::BCD() - Constructs a new BCD with a value of "0"
 // "In the BCD namespace, method named BCD receiving (<no arguments>), initializing 'head' to 'nullptr' and executing {<no commands>}
 BCD::BCD() { // By default, the node pointer (BCDnode*) named 'head' is initialized to nullptr
-
+   isPositive = true;
    headptr = new BCDnode();
    BCDnode* body = new BCDnode(0, headptr, headptr); // Generates new node with value of 0, headptr set to both 'next' and 'prev'
    headptr->lessSDptr = body;
@@ -160,6 +160,9 @@ BCD::BCD(int someInt) {
       // Reverse the sign of the received int so BCD formation is performed with all positive nodes
       cout << "Achtung! This is negative!" << endl;
       someInt = someInt * -1;
+   }
+   else {
+      isPositive = true;
    }
 
    // Make the head node
@@ -188,10 +191,33 @@ BCD::BCD(const BCD& someBCD) {
 // Destructor
 // TODO: DELETE ALL NODES IN THE BCD! This is where that happens.
 BCD::~BCD() {
-   clear(headptr);
+   cout << "~BCD Destructor! Aaaaaargh!" << endl;
+   obliterate(headptr);
 }
 
 // ----OVERLOADS----
+
+const BCD& BCD::operator=(const BCD& someBCD) { // Needs to have a BCD return type for multiple assignment operators
+   cout << "Starting operator=" << endl;
+   // Check to ensure that we're not looking at the same thing
+   if (headptr == someBCD.headptr) {
+      cout << "These are the same, so do nothing." << endl;
+   }
+   else {
+      // Make a deep copy (otherwise the thing about to get destructed is going to get asploded
+      isPositive = someBCD.isPositive; // Sign to determine whether this BCD is positive or negative
+      length = someBCD.length;
+      // Copy the first body node
+      headptr->moreSDptr->data = someBCD.headptr->moreSDptr->data;
+   }
+
+
+
+   
+   
+   // Return deep copy
+   return *this;
+}
 
 // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a BCD object (right)
 // Parameters: thisLine - Used to store successive lines of data from cin.
@@ -213,7 +239,7 @@ istream& operator>> (istream& cinData, BCD& someBCD) { // where 'cinData' is the
 // Functions called: BCD::toString() - Converts BCD digits to a string object.
 // If it's in the class definition, include 'friend'
 ostream& operator<< (ostream& coutStream, BCD& someBCD) { // where 'cinData' is the input variable and 'card' is the PunchCard object
-   string thisBCDNumber = "Operator<< Test String: ";
+   string thisBCDNumber = "";
    // <Implement all string appending here>
    thisBCDNumber += someBCD.toString();
    coutStream << thisBCDNumber;
@@ -231,27 +257,26 @@ BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
                                               // Term2BCD exists
 
 
-   cout << "Wheeee!" << term1BCD.toString() << term2BCD.toString() << endl;
+   cout << "Starting operator+: " << term1BCD.toString() << term2BCD.toString() << endl;
    BCD sumBCD; // Generate a sumBCD with value set to 0.
-               // < Implement addition logic here >
-               // Step 1, set current for all BCDs to Least SigDigit
-               // currT1 = term1BCD.headptr->moreSDptr;
-               // currT2 = term2BCD.headptr->moreSDptr;
-               // currSum = sumBCD.headptr->moreSDptr;
-   if (term1BCD.isPositive && term2BCD.isPositive) {
-      cout << "Both terms are positive, so add()" << endl;
+   if (term1BCD.isPositive == true && term2BCD.isPositive == true) {
+      cout << "Positive + Positive: so add()" << endl;
       sumBCD = term1BCD.add(term2BCD);
+      cout << "Not reaching here: L243" << endl;
    }
-   else if (term1BCD.isPositive && !term2BCD.isPositive || !term1BCD.isPositive && term2BCD.isPositive) {
+/*   else if (term1BCD.isPositive && !term2BCD.isPositive || !term1BCD.isPositive && term2BCD.isPositive) {
       // Determine which is greater, send that first
       // Determine final sign, reserve it
+      cout << "Positive + Negative or Negative + Positive: so subtract()" << endl;
       bool reserveSign = true;
       sumBCD = term1BCD.subtract(term2BCD);
       sumBCD.isPositive = reserveSign;
    }
    else {
+      cout << "Negative + Negative: so add()" << endl;
       sumBCD = term1BCD.add(term2BCD);
-   }
+   } */
+   cout << "Not reaching here: L 255" << endl;
    return sumBCD;
 }
 
@@ -331,14 +356,14 @@ return sumBCD;
 // TODO: Implement copy() - Deep copy of all nodes
 
 
-// clear() - Deletes all nodes linked to the specified headnode and deallocates memory
+// obliterate() - Deletes all nodes linked to the specified headnode and deallocates memory
 // Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
 // Preconditions: None
 // Postconditions: None
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
 // Functions called: None
-void BCD::clear(BCDnode* headStart) {
-   cout << "Start clear(): " << endl;
+void BCD::obliterate(BCDnode* headStart) {
+   cout << "Start obliterate(): " << endl;
    BCDnode* currTarget = headStart->lessSDptr;
    // H - 1 - 2 - 3 - 4
    // Test that the BCD is not empty!
@@ -347,7 +372,7 @@ void BCD::clear(BCDnode* headStart) {
       currTarget = headStart->lessSDptr;
    }
    cout << "Body nodes deleted" << endl;
-   cout << "Targeting head in clear()" << endl;
+   cout << "Targeting head in obliterate()" << endl;
    remove(headStart);
 }
 
@@ -404,7 +429,7 @@ void BCD::remove(BCDnode* target) {
 // Postconditions: None
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
 // Functions called: None
-BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method location before 'this' becomes available for use
+BCD const BCD::add(const BCD& term2BCD) const { // Need to fully qualify method location before 'this' becomes available for use
    cout << "Starting add()" << endl;
 
    int sum = 0;
@@ -469,9 +494,10 @@ BCD const BCD::add(const BCD& term2BCD) { // Need to fully qualify method locati
       }
    } // Closing while loop
 
-   cout << "sum of T1 and T2: " << sumBCD.toString() << endl;
+   cout << "sum of T1 and T2: L475: " << sumBCD.toString() << endl;
+   cout << "Not reaching here: L476" << endl;
    // Send the sumBCD, now complete, back to whatever called this function
-   return(sumBCD);
+   return sumBCD;
 }
 
 // subtract() - Subtracts a BCD object from another BCD object
@@ -615,8 +641,7 @@ const void BCD::insertLSD(int someData) {
 // Return value: A string, 80 characters in length, with a newline character at its end.
 // Functions called: None
 const string BCD::toString() const {
-   //	cout << "Begin toString()" << endl; // DEBUG
-   string returnString = "Start toString(): ";
+   string returnString = "'";
 
    // Append the headptr dereference's nodeName to the returnString.
    // returnString += headptr->nodeName;
@@ -632,5 +657,6 @@ const string BCD::toString() const {
       // And move the current node to the next Less SigDigit
       currentNodeptr = currentNodeptr->lessSDptr;
    }
+   returnString += "'";
    return returnString;
 }
