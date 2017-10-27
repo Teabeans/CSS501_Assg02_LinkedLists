@@ -158,6 +158,19 @@ public:
          moreSDptr(moreSigDigit),
          lessSDptr(lessSigDigit) {
       }
+
+      // Node constructor using another node - Creates a deep copy
+      BCDnode(BCDnode* targetNodeptr) :
+         // Begin copying fields
+         nodeName(targetNodeptr->nodeName + " copy"),
+         data (targetNodeptr->data),
+         borrow (targetNodeptr->borrow),
+         carry(targetNodeptr->carry),
+         moreSDptr(targetNodeptr->moreSDptr),
+         lessSDptr(targetNodeptr->lessSDptr) {
+         // Field copies completed
+         //New node exists with identical internal states
+      }
    };
 
    // headptr: Pointer to the head BCDnode
@@ -234,7 +247,9 @@ public:
    // Functions called: None
    const string toString() const;
 
-   const BCD& BCD::operator=(const BCD& someBCD) ;
+   void const BCD::deepcopy(const BCD& target);
+
+   const BCD& BCD::operator=(const BCD& someBCD);
 
    // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a PunchCard object (right)
    // Parameters: thisLine - Used to store successive lines of data from cin.
