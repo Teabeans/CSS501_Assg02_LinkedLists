@@ -189,7 +189,7 @@ BCD::BCD(const BCD& someBCD) {
 }
 
 // Destructor
-// TODO: DELETE ALL NODES IN THE BCD! This is where that happens.
+// Deletes all nodes in a list (appears to work as of 10.27
 BCD::~BCD() {
    cout << "~BCD Destructor! Aaaaaargh!" << endl;
    obliterate(headptr);
@@ -197,6 +197,12 @@ BCD::~BCD() {
 
 // ----OVERLOADS----
 
+// = - Custom behavior for the assignment operator when dealing with a BCD object (left) and a BCD object (right)
+// Parameters: 
+// Preconditions: 
+// Postconditions: inputArray will be loaded with the first 80 characters of the first 12 lines of input from cin.
+// Return value: None
+// Functions called: None
 const BCD& BCD::operator=(const BCD& someBCD) { // Needs to have a BCD return type for multiple assignment operators
    cout << "Starting operator=" << endl;
    // Check to ensure that we're not looking at the same thing
@@ -204,20 +210,23 @@ const BCD& BCD::operator=(const BCD& someBCD) { // Needs to have a BCD return ty
       cout << "These are the same, so do nothing." << endl;
    }
    else {
-      // Make a deep copy (otherwise the thing about to get destructed is going to get asploded
+      // Clear the current linked list entirely:
+      obliterate(headptr);
+
+      // Make a deep copy (otherwise the thing about to get destructed is going to get asploded. Pseudocode is:
+      // this = BCD(someBCD); // Uses old assignment operator, but links to a completely fresh BCD object with unlinked guts.
       isPositive = someBCD.isPositive; // Sign to determine whether this BCD is positive or negative
       length = someBCD.length;
       // Copy the first body node
+      // TODO: Implement a BCD copy constructor that takes a different BCD and makes a fresh BCD with an identical internal state. This handles all linking of nodes
+      
+      //
       headptr->moreSDptr->data = someBCD.headptr->moreSDptr->data;
    }
-
-
-
-   
-   
    // Return deep copy
    return *this;
-}
+} // Right here, the right-hand argument (passed to this method as 'someBCD') is going to get completely destructed.
+  // No reference or pointer to any of that content can exist, else attempting to access it after will result in a pointer exception.
 
 // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a BCD object (right)
 // Parameters: thisLine - Used to store successive lines of data from cin.
@@ -353,7 +362,22 @@ return sumBCD;
 // return(*this); // We need this line?
 //}
 
-// TODO: Implement copy() - Deep copy of all nodes
+// TODO: Implement copy() - Deep copy of all nodes from one BCD to this BCD
+// Precondition:
+void const BCD::deepcopy(const BCD& target) {
+   if (headptr == target.headptr) {
+      cout << "Same target as this, so do nothing" << endl;
+   }
+   else {
+         obliterate(headptr);
+         
+         headptr = new BCDnode(target.headptr); // Makes a new head, copied from internal values of target.headptr
+         BCDnode* newBody = new BCDnode(target.headptr->moreSDptr->data, headptr, headptr);
+         headptr->lessSDptr = newBody;
+         headptr->moreSDptr = newBody; // 4/4 pointers are set
+         ;
+   }
+}
 
 
 // obliterate() - Deletes all nodes linked to the specified headnode and deallocates memory
