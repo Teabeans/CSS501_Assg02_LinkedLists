@@ -1,16 +1,15 @@
 // Tim Lum
 // twhlum@gmail.com
-// 2017.10.10
+// 2017.10.27
 // For the University of Washington Bothell CSS 501A
 // Autumn 2017, Graduate Certificate in Software Design & Development (GCSDD)
 //
 // File Description:
-// This file is the header (definitions) of the PunchCard class.
+// This file is the header (definitions) of the Binary Coded Decimal (BCD, aka. "Big Ass Number") class.
 //
 // Package files:
-// Assg01_Driver_PunchCards.cpp
-// PunchCard.cpp
-// PunchCard.h
+// BCD.cpp
+// BCD.h
 //
 // Acknowledgements:
 // Source material from:
@@ -81,6 +80,9 @@
 //    B. "Gotos" (?CONFIRM?)
 //
 // Special instructions:
+// To install G++:
+// sudo apt install g++
+// 
 // To update Linux:
 // sudo apt-get update && sudo apt-get install
 // sudo apt-get update
@@ -99,6 +101,10 @@
 //
 // To run with test input:
 // ./a.out < TestInput.txt
+//
+// To run Valgrind:
+// In Linux:
+// valgrind --leak-check=full .a/a.out
 //
 // ---- BEGIN STUDENT CODE ----
 
@@ -239,6 +245,14 @@ public:
    // Functions called: None
    const void BCD::insertLSD(int someData);
 
+   // numDigits() - Returns the number of nodes within a BCD
+   // Parameters: None
+   // Preconditions: None
+   // Postconditions: None
+   // Return value: length - An int value representing the length of the BCD object.
+   // Functions called: None
+   int BCD::numDigits() const;
+
    // toString() - To return a string representation of the BCD object.
    // Parameters: someData - Used to populate the new node's data field.
    // Preconditions: None
@@ -248,6 +262,10 @@ public:
    const string toString() const;
 
    void const BCD::deepcopy(const BCD& target);
+
+   operator int() const;
+
+   const bool BCD::operator==(const BCD& someBCD);
 
    const BCD& BCD::operator=(const BCD& someBCD);
 
