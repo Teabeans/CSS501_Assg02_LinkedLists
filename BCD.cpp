@@ -106,6 +106,9 @@
 
 #pragma once
 
+// Includes exceptions
+#include <stdexcept>
+
 //Necessary to interact with 'cin' and 'cout' streams
 #include <iostream>
 
@@ -168,10 +171,13 @@ BCD::BCD(int someInt) {
    // Make the head node
    headptr = new BCDnode();
    // Generates new node with value of the LSD of the int passed, headptr set to both 'next' and 'prev'
+   // Make the first body node
+   cout << someInt << endl;
    BCDnode* body = new BCDnode((someInt % 10), headptr, headptr);
    headptr->lessSDptr = body;
    headptr->moreSDptr = body; // 4 of 4 pointers are set
    someInt = someInt / 10; // Divide
+   cout << someInt << endl;
 
    while (someInt > 0) { // Breaks after Most SigDigit is divided by 10
       insertMSD(someInt % 10); // Remainder of the int when divided by 10 is always the least significant digit
@@ -195,7 +201,64 @@ BCD::~BCD() {
    obliterate(headptr);
 }
 
+
+
 // ----OVERLOADS----
+
+
+// int - Custom behavior for the int conversion operator
+// Parameters: 
+// Preconditions: A BCD object exists with headptr directed to a valid linked list.
+// Postconditions: An int representation of the BCD number between (2^31)-1 and (-)(2^31) has been returned OR an 'out_of_range' error has been thrown.
+// Return value: returnInt - Variable storing the value of the BCD integer.
+// Functions called: None
+BCD::operator int() const {
+   // Initial check of BCD length. Used to exclude number out of range of doubles and Long Longs.
+   if (numDigits() > 10) {
+      throw std::out_of_range("The BCD exceeds the value of an int.");
+   }
+   // Higher capacity variable used to check from intMax to 999,999,999.
+   double overflowInt = 0;
+   // Eventual return integer
+   int returnInt = 0;
+   BCDnode* curr = headptr->lessSDptr;
+
+   while (curr != headptr) {
+      // If we're on the next SD, multiply by 10
+      overflowInt = overflowInt * 10;
+      // Add the next LessSD to the sum...
+      overflowInt = overflowInt + curr->data;
+      // And move to the next node (if curr lands back on headptr, it will terminate after this).
+      curr = curr->lessSDptr;
+   }
+   if (isPositive == false) {
+      overflowInt = overflowInt * (-1);
+   }
+   // Check to see if the long long is within a valid range...
+   if (overflowInt > 2147483647 || overflowInt < (-2147483647 - 1)) {
+      throw std::out_of_range("The BCD exceeds the value of an int.");
+   }
+   // If it's within range, assign to the return variable and send it back.
+   else {
+      returnInt = overflowInt;
+      return(returnInt);
+   }
+}
+
+// == - Custom behavior for the equality operator when dealing with a BCD object (left) and a BCD object (right)
+// Parameters: 
+// Preconditions: 
+// Postconditions: inputArray will be loaded with the first 80 characters of the first 12 lines of input from cin.
+// Return value: None
+// Functions called: None
+const bool BCD::operator==(const BCD& someBCD) { // Needs to have a BCD return type for multiple assignment operators
+   if (headptr == someBCD.headptr) {
+      return(true);
+   }
+   else {
+      return(false);
+   }
+}
 
 // = - Custom behavior for the assignment operator when dealing with a BCD object (left) and a BCD object (right)
 // Parameters: 
@@ -428,6 +491,7 @@ void BCD::remove(BCDnode* target) {
       target->lessSDptr = nullptr;
 
       // Step 3: Return the node to the system
+      // Deletes whatever "target" is pointing at
       delete target;
    }
    else {
@@ -442,6 +506,7 @@ void BCD::remove(BCDnode* target) {
       target->lessSDptr = nullptr;
 
       // Step 3: Return the node to the system
+      // Deletes whatever "target" is pointing at
       delete target;
       cout << "Head removed!" << endl;
    }
@@ -656,6 +721,22 @@ const void BCD::insertLSD(int someData) {
    // Redirect the head's moreSDptr to the current node.
    headptr->moreSDptr = insertedNodeptr;
    // New node created with int data and 4 of 4 pointers are pointed at the correct place
+}
+
+// numDigits() - Returns the number of nodes within a BCD
+// Parameters: None
+// Preconditions: None
+// Postconditions: None
+// Return value: length - An int value representing the length of the BCD object.
+// Functions called: None
+int BCD::numDigits() const {
+   int counter = 0;
+   BCDnode* curr = headptr->moreSDptr;
+   while (curr != headptr) {
+      curr = curr->moreSDptr;
+      counter++;
+   }
+   return(counter);
 }
 
 // toString() - To return a string representation of the decoded PunchCard.
