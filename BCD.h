@@ -103,8 +103,13 @@
 // ./a.out < TestInput.txt
 //
 // To run Valgrind:
-// In Linux:
-// valgrind --leak-check=full .a/a.out
+// Install Valgrind:
+// sudo apt install valgrind
+//
+// Run with:
+// valgrind --leak-check=full <file folder path>/<file name, usually a.out>
+// ie.
+// valgrind --leak-check=full /home/Teabean/a.out
 //
 // ---- BEGIN STUDENT CODE ----
 
@@ -168,13 +173,21 @@ public:
       // Node constructor using another node - Creates a deep copy
       BCDnode(BCDnode* targetNodeptr) :
          // Begin copying fields
-         nodeName(targetNodeptr->nodeName + " copy"),
-         data (targetNodeptr->data),
-         borrow (targetNodeptr->borrow),
-         carry(targetNodeptr->carry),
-         moreSDptr(targetNodeptr->moreSDptr),
-         lessSDptr(targetNodeptr->lessSDptr) {
+//         nodeName(targetNodeptr->nodeName),
+         data(targetNodeptr->data)
+//         borrow(targetNodeptr->borrow),
+//         carry(targetNodeptr->carry),
+//         moreSDptr(targetNodeptr->moreSDptr),
+//         lessSDptr(targetNodeptr->lessSDptr)
+      {
+         nodeName = targetNodeptr->nodeName;
+//            data(targetNodeptr->data),
+//            borrow(targetNodeptr->borrow),
+//            carry(targetNodeptr->carry),
+//            moreSDptr(targetNodeptr->moreSDptr),
+//            lessSDptr(targetNodeptr->lessSDptr)
          // Field copies completed
+         cout << "Copies completed" << endl;
          //New node exists with identical internal states
       }
    };
@@ -213,9 +226,9 @@ public:
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
 
-   void BCD::obliterate(BCDnode* headStart);
+   void obliterate(BCDnode* headStart);
 
-   void BCD::remove(BCDnode* target);
+   void remove(BCDnode* target);
 
    BCD const add(const BCD& term2BCD) const;
 
@@ -235,7 +248,7 @@ public:
    // Postconditions: A new node is inserted as the the least significant digit position in the BCD
    // Return value: None
    // Functions called: None
-   const void BCD::insertMSD(int someData);
+   const void insertMSD(int someData);
 
    // insertLSD() - Inserts a node at the Least Significant Digit position
    // Parameters: someData - Used to populate the new node's data field.
@@ -243,7 +256,7 @@ public:
    // Postconditions: A new node is inserted as the the least significant digit position in the BCD
    // Return value: None
    // Functions called: None
-   const void BCD::insertLSD(int someData);
+   const void insertLSD(int someData);
 
    // numDigits() - Returns the number of nodes within a BCD
    // Parameters: None
@@ -251,7 +264,7 @@ public:
    // Postconditions: None
    // Return value: length - An int value representing the length of the BCD object.
    // Functions called: None
-   int BCD::numDigits() const;
+   int numDigits() const;
 
    // toString() - To return a string representation of the BCD object.
    // Parameters: someData - Used to populate the new node's data field.
@@ -261,13 +274,13 @@ public:
    // Functions called: None
    const string toString() const;
 
-   void const BCD::deepcopy(const BCD& target);
+   void const deepcopy(const BCD& target);
 
    operator int() const;
 
-   const bool BCD::operator==(const BCD& someBCD);
+   const bool operator==(const BCD& someBCD);
 
-   const BCD& BCD::operator=(const BCD& someBCD);
+   const BCD& operator=(const BCD& someBCD);
 
    // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a PunchCard object (right)
    // Parameters: thisLine - Used to store successive lines of data from cin.
