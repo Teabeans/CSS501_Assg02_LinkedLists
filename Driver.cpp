@@ -5,18 +5,19 @@ using namespace std;
 
 int main() {
    // Control variables
-   bool BCDConstructorDefaultTest      = 1;
-   bool BCDtoStringTest                = 1;
-   bool BCDOperatorIntTest             = 1;
-   bool EqualityOperatorTest           = 1;
-   bool BCDConstructorByIntTest        = 1;
-   bool BCDnumDigitsTest               = 1;
+   bool BCDConstructorDefaultTest      = 0;
+   bool BCDtoStringTest                = 0;
+   bool BCDOperatorIntTest             = 0;
+   bool EqualityOperatorTest           = 0;
+   bool BCDConstructorByIntTest        = 0;
+   bool BCDnumDigitsTest               = 0;
    bool BCDAssignmentOperatorTest      = 0;
-   bool DestructorTest                 = 1;
+   bool DestructorTest                 = 0;
+   bool BCDIntAssignmentTest           = 1;
 
    // Test of the BCD default constructor
    if (BCDConstructorDefaultTest == true) {
-      cout << endl <<  "BCD Default Constructor test:" << endl;
+      cout << endl << "BCD Default Constructor test:" << endl;
       cout << "Insantiating BCD object... ";
       BCD constructorTest;
       cout << "Object of class 'BCD' created." << endl;
@@ -66,12 +67,26 @@ int main() {
    // Test of equality operator
    if (EqualityOperatorTest == true) {
       cout << endl << "Equality operator overload test:" << endl;
-      BCD equalityTest1;
-      BCD equalityTest2;
+      BCD equalityTest1(-123); //  Set 1: BCD signs differ
+      BCD equalityTest2(123);  //  Set 1: Expected 1 : 0 : 0 : 1
+      BCD equalityTest3(12345); //   Set 2: BCDs are equivalent
+      BCD equalityTest4(12345); //   Set 2: Expected: 1 : 1 : 1 : 1
+      BCD equalityTest5(22345); // Set 3: BCD value differs
+      BCD equalityTest6(12345); // Set 3: Expected 1 : 0 : 0 : 1
       cout << "EQTest1 == EQtest1: " << (equalityTest1 == equalityTest1) << endl; // Expected: 1
       cout << "EQTest1 == EQtest2: " << (equalityTest1 == equalityTest2) << endl; // Expected: 0
       cout << "EQTest2 == EQtest1: " << (equalityTest2 == equalityTest1) << endl; // Expected: 0
       cout << "EQTest2 == EQtest2: " << (equalityTest2 == equalityTest2) << endl; // Expected: 1
+
+      cout << "EQTest3 == EQtest3: " << (equalityTest3 == equalityTest3) << endl; // Expected: 1
+      cout << "EQTest3 == EQtest4: " << (equalityTest3 == equalityTest4) << endl; // Expected: 0
+      cout << "EQTest4 == EQtest3: " << (equalityTest4 == equalityTest3) << endl; // Expected: 0
+      cout << "EQTest4 == EQtest4: " << (equalityTest4 == equalityTest4) << endl; // Expected: 1
+
+      cout << "EQTest5 == EQtest5: " << (equalityTest5 == equalityTest5) << endl; // Expected: 1
+      cout << "EQTest5 == EQtest6: " << (equalityTest5 == equalityTest6) << endl; // Expected: 0
+      cout << "EQTest6 == EQtest5: " << (equalityTest6 == equalityTest5) << endl; // Expected: 0
+      cout << "EQTest6 == EQtest6: " << (equalityTest6 == equalityTest6) << endl; // Expected: 1
    }
 
    // Test of BCD constructor by 'int'
@@ -123,53 +138,70 @@ int main() {
 
    // Test of BCD destructor ~BCD()
    if (DestructorTest == true) {
+      cout << endl << "BCD Destructor test:" << endl;
+      cout << "Note: No meaningful output is likely to be generated here. Use Valgrind." << endl;
       // To compile in Linux:
       // g++ -std=c++11 PunchCard.cpp main.cpp
+
+      // To install Valgrind:
+      // sudo apt install valgrind
+
       // To run Valgrind:
-      // valgrind --leak-check=full .a/a.out
+      // valgrind --leak-check=full <file path>/a.out
+      // valgring --leak-check=full --show-leak-kinds=all <file path>/a.out
+
       BCD destructThis(24682468);
    } // Destructor (~BCD*()) gets called right here
 
-   /*
-   if (true) {
-      int someInt = 12345;
-      BCD destructorTest(someInt);
+   // Test of BCD int assignment
+   if (BCDIntAssignmentTest == true) {
+      cout << endl << "BCD Int Assignment test:" << endl;
+      cout << "Assigning int to BCD object" << endl;
+      BCD assignmentTest = 13579;
+      cout << "The value of the test BCD is: " << assignmentTest.toString() << endl;
    }
+     
+     if (true) {
+     int someInt = 12345;
+     BCD destructorTest(someInt);
+     }
 
-   int a = 123456;
-   int b = 12341123;
+     int a = 123456;
+     int b = 12341123;
 
-   BCD n1(a);
-   cout << "Start N1 " << n1 << endl;
-   BCD n2(b);
-   cout << "Start N2 " << n2 << endl;
+     BCD n1(a);
+     cout << "Start N1 " << n1 << endl;
+     BCD n2(b);
+     cout << "Start N2 " << n2 << endl;
 
-   cout << "Converted 125 (int) to " << n2 << " BCD" << endl;
-   n1 + n2;
-   cout << "Did we reach this?" << endl;
-//   n1 - n2;
+     cout << "Converted 125 (int) to " << n2 << " BCD" << endl;
+     // TODO: Program is breaking here
+     n1 = n1 + n2;
+     cout << "Did we reach this?" << endl;
+     n1 - n2;
 
-   //n1 = n2 + b;
-   /*
-   cout << n2 << " + 975 (int) = " << n1 << endl;
+     n1 = n2 + b;
+     cout << "Final test complete!" << endl;
+     /*
+     cout << n2 << " + 975 (int) = " << n1 << endl;
 
-   cin >> n2;
-   cout << "Input " << n2 << endl;
+     cin >> n2;
+     cout << "Input " << n2 << endl;
 
-   BCD n3 = 64;
-   cout << "Converted 64 (int) to " << n3 << " BCD" << endl;
+     BCD n3 = 64;
+     cout << "Converted 64 (int) to " << n3 << " BCD" << endl;
 
-   BCD sum = n1 + n3;
-   BCD difference = n1 - n3;
-   BCD product = n1 * n3;
-   BCD quotient = n1 / n3;
-   cout << n1 << " + " << n3 << " = " << sum;
-   cout << n1 << " - " << n3 << " = " << difference;
-   cout << n1 << " * " << n3 << " = " << product;
-   cout << n1 << " / " << n3 << " = " << quotient;
+     BCD sum = n1 + n3;
+     BCD difference = n1 - n3;
+     BCD product = n1 * n3;
+     BCD quotient = n1 / n3;
+     cout << n1 << " + " << n3 << " = " << sum;
+     cout << n1 << " - " << n3 << " = " << difference;
+     cout << n1 << " * " << n3 << " = " << product;
+     cout << n1 << " / " << n3 << " = " << quotient;
 
-   cout << product << " has " << product.numDigits() << " digits" << endl;
-   */
+     cout << product << " has " << product.numDigits() << " digits" << endl;
+     */
 
    return (0);
 }
