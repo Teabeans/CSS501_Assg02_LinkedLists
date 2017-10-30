@@ -233,9 +233,11 @@ public:
    // #remove()
    bool remove(BCDnode* target);
 
-   BCD const add(const BCD& term2BCD) const;
+   // #add()
+   BCD const add(const BCD& term2BCD, bool isPositive) const;
 
-   BCD const subtract(const BCD& term2BCD);
+   // #subtract()
+   BCD const subtract(const BCD& term2BCD, bool isPositive) const;
 
    // #isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
    // Parameters: No internal fields
@@ -277,6 +279,10 @@ public:
    // Functions called: None
    const string toString() const;
 
+   //#isGreaterMagnitudeThan()
+   bool const isGreaterMagnitudeThan(const BCD& term2);
+
+   //#deepcopy()
    void const deepcopy(const BCD& target);
 
    operator int() const;
