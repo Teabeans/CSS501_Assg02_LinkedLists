@@ -119,18 +119,19 @@
 
 //Necessary to interact with 'cin' and 'cout' streams
 #include <iostream>
-
-// Necessary for string operations
-#include <string>
+#include <string> // Necessary for string operations
 
 using namespace std;
 
+// Per pg. 273
+// class LinkedList : public li
 class BCD {
    // --- PRIVATE REGION --- PRIVATE REGION --- PRIVATE REGION ---
 private:
 
    // PRIVATE FIELDS:
    // ---- FIELDS ----
+
 
    // length: For the head node only. Integer representing the node length of this BCD number ("1-2-3-4" has a length of "4")
    // Invariant information: Range is from 0 to the maximimum value of an int (2,147,483,647)
@@ -139,8 +140,6 @@ private:
    // isPositive: Represents whether this BCD object is positive or not
    // Invariant information: 
    bool isPositive;
-
-
 
    // PRIVATE METHODS:
 
@@ -170,22 +169,24 @@ public:
          lessSDptr(lessSigDigit) {
       }
 
+
+
       // Node constructor using another node - Creates a deep copy
       BCDnode(BCDnode* targetNodeptr) :
          // Begin copying fields
-//         nodeName(targetNodeptr->nodeName),
-         data(targetNodeptr->data)
-//         borrow(targetNodeptr->borrow),
-//         carry(targetNodeptr->carry),
-//         moreSDptr(targetNodeptr->moreSDptr),
-//         lessSDptr(targetNodeptr->lessSDptr)
+         //         nodeName(targetNodeptr->nodeName),
+         data(0) // data(targetNodeptr->data)
+         //         borrow(targetNodeptr->borrow),
+         //         carry(targetNodeptr->carry),
+         //         moreSDptr(targetNodeptr->moreSDptr),
+         //         lessSDptr(targetNodeptr->lessSDptr)
       {
          nodeName = targetNodeptr->nodeName;
-//            data(targetNodeptr->data),
-//            borrow(targetNodeptr->borrow),
-//            carry(targetNodeptr->carry),
-//            moreSDptr(targetNodeptr->moreSDptr),
-//            lessSDptr(targetNodeptr->lessSDptr)
+         //            data(targetNodeptr->data),
+         //            borrow(targetNodeptr->borrow),
+         //            carry(targetNodeptr->carry),
+         //            moreSDptr(targetNodeptr->moreSDptr),
+         //            lessSDptr(targetNodeptr->lessSDptr)
          // Field copies completed
          cout << "Copies completed" << endl;
          //New node exists with identical internal states
@@ -226,21 +227,23 @@ public:
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
 
-   void obliterate(BCDnode* headStart);
+   // #obliterate()
+   void obliterate();
 
-   void remove(BCDnode* target);
+   // #remove()
+   bool remove(BCDnode* target);
 
    BCD const add(const BCD& term2BCD) const;
 
    BCD const subtract(const BCD& term2BCD);
 
-   // isLastCard() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
+   // #isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
    // Parameters: No internal fields
    // Preconditions: None
    // Postconditions: None
    // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
    // Functions called: None
-   const bool isLastNode();
+   const bool isLastNode(BCDnode* someNode);
 
    // insertMSD() - Inserts a node at the Most Significant Digit position
    // Parameters: someData - Used to populate the new node's data field.
@@ -278,9 +281,20 @@ public:
 
    operator int() const;
 
-   const bool operator==(const BCD& someBCD);
+   // Per pg. 436 - Modeled after operator== overload
+   // bool operator<(const LinkedList<ItemType>& rightHandSide) const;
+   bool operator<(const BCD& someBCD) const;
 
-   const BCD& operator=(const BCD& someBCD);
+   // Per pg. 436
+   // bool operator==(const LinkedList<ItemType>& rightHandSide) const;
+   bool operator==(const BCD& someBCD) const;
+
+   // Per pg. 438
+   // #operator=
+   // Method returns a reference to the receiving object
+   // LinkedList<ItemType>& operator=(const LinkedList<ItemType>& rightHandSide);
+   // Must include BCD:: to make this a 'member function', otherwise it's global.
+   BCD& BCD::operator=(const BCD& someBCD);
 
    // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a PunchCard object (right)
    // Parameters: thisLine - Used to store successive lines of data from cin.
@@ -307,7 +321,7 @@ public:
    // Postconditions: A new BCD object exists representing the summed addition of the old BCD and received BCD.
    // Return value: A new BCD object representing the summed addition
    // Functions called: BCD::BCD(int) - Converts an int to a BCD object
-   friend BCD operator+(BCD& term1BCD, BCD& term2BCD);
+   friend const BCD BCD::operator+(BCD& term1BCD, BCD& term2BCD);
 
    friend BCD operator-(BCD& term1BCD, BCD& term2BCD);
 
