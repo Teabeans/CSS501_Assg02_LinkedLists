@@ -20,12 +20,21 @@ int main() {
    bool DestructorTest = 0; // Not done - Test in Valgrind
 
    bool BCDIntAssignmentTest = 0; // Done
+   bool MagnitudeTest = 0; // Done
+   bool OperatorPlusTest = 0; // Done
+   bool PlusAndAssignTest = 0; // Done
+   bool cinDebugTest = 0; // Done - Confirm that the program can pull content in from cin.
+   // In Visual Studio 2017, go to Debug > Project Properties... > Configuration Properties > Debugging > Command Arguments > Edit...
+   // Enter '< someTextFileName.txt' (sans single quotes)
+   // The above text file should be located in your project directory adjacent your source files, containing valid data entries
+   // In this case, whitespace delimited integers.
+   // The text file may be located elsewhere, but the command argument file path will need to be adjusted accordingly.
+   bool cinBCDTest = 0; // Done
 
+   bool OperatorPlusTestII = 1; // Not done, Subtract() must be implemented
 
+   bool OperatorMinusTest = 1;
 
-
-
-   bool OperatorPlusTest = 1;
 
 
    // Test of the BCD default constructor
@@ -219,9 +228,32 @@ int main() {
    // Test of BCD int assignment
    if (BCDIntAssignmentTest == true) {
       cout << endl << "BCD Int Assignment test:" << endl;
-      cout << "Assigning int to BCD object" << endl;
+      cout << "Assigning int (13579) to BCD object" << endl;
       BCD assignmentTest = 13579;
       cout << "The value of the test BCD is: " << assignmentTest.toString() << endl;
+      cout << "Reassigning a value (2468)..." << endl;
+      assignmentTest = 2468;
+      cout << "The value of the test BCD is: " << assignmentTest.toString() << endl;
+      cout << "Reassigning a value (-9999)..." << endl;
+      assignmentTest = -9999;
+      cout << "The value of the test BCD is: " << assignmentTest.toString() << endl;
+   }
+
+   // Test of BCD magnitude judging
+   if (MagnitudeTest == true) {
+      cout << endl << "Magnitude test:" << endl;
+      BCD term1(12345);
+      BCD term2(-12345);
+
+      BCD term3(12345);
+      BCD term4(-12346);
+
+      BCD term5(12346);
+      BCD term6(-1234);
+
+      cout << "T1 is greater magnitude than T2? (expect 0) : " << term1.isGreaterMagnitudeThan(term2) << endl;
+      cout << "T3 is greater magnitude than T4? (expect 0) : " << term3.isGreaterMagnitudeThan(term4) << endl;
+      cout << "T5 is greater magnitude than T6? (expect 1) : " << term5.isGreaterMagnitudeThan(term6) << endl;
    }
 
    // Test of Operator+ overload
@@ -235,17 +267,67 @@ int main() {
       cout << "Operator+ completed successfully." << endl;
    }
 
-   // TODO: Program is breaking here
-//   n1 + n2;
-//   n1 - n2;
+   // Test of Operator+ and Operator= overload
+   if (PlusAndAssignTest == true) {
+      cout << endl << "Operator+ and Operator= test:" << endl;
+      BCD term1(123); 
+      BCD term2(654);
+      cout << term1 << term2 << endl;
 
-//   n1 = n2 + b;
+      BCD term3 = term1 + term2;
+      cout << term3 << endl;
+      cout << "If result is '777', Operator+ and Operator= overload test completed successfully." << endl;
+   }
+
+   // Test of external prompt to cin input stream
+   if (cinDebugTest == true) {
+      cout << endl << "Reading from cin" << endl;
+      string test = "";
+      cin >> test;
+      cout << test;
+   }
+
+   // Test of cin input to a BCD object
+   if (cinBCDTest == true) {
+      BCD cinEater;
+      cout << "Content of cinEater: " << cinEater << endl;
+      cout << "Inserting content from cin..." << endl;
+      cin >> cinEater;
+
+      cout << "Content of cinEater: " << cinEater << endl;
+   }
+
+   // Test of Operator+ overload, round II
+   if (OperatorPlusTestII == true) {
+      cout << endl << "Operator+ test:" << endl;
+      BCD term1(-1234);
+      BCD term2(-678);
+      cout << "Term1: " << term1.toString() << endl;
+      cout << "Term2: " << term2.toString() << endl;
+      term1 + term2;
+      cout << "Operator+ completed successfully." << endl;
+   }
+
+   // Test of Operator- overload
+   if (cinBCDTest == true) {
+      cout << endl << "Operator+ test:" << endl;
+      BCD term1(334);
+      BCD term2(-333);
+      cout << "Term1: " << term1.toString() << endl;
+      cout << "Term2: " << term2.toString() << endl;
+      term1 - term2;
+      cout << "Operator- completed successfully." << endl;
+   }
+
+
+
+
+
    cout << "Final test complete!" << endl;
    /*
    cout << n2 << " + 975 (int) = " << n1 << endl;
 
-   cin >> n2;
-   cout << "Input " << n2 << endl;
+
 
    BCD n3 = 64;
    cout << "Converted 64 (int) to " << n3 << " BCD" << endl;
