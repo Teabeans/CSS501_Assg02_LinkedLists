@@ -5,15 +5,28 @@ using namespace std;
 
 int main() {
    // Control variables
-   bool BCDConstructorDefaultTest      = 0;
-   bool BCDtoStringTest                = 0;
-   bool BCDOperatorIntTest             = 0;
-   bool EqualityOperatorTest           = 0;
-   bool BCDConstructorByIntTest        = 0;
-   bool BCDnumDigitsTest               = 0;
-   bool BCDAssignmentOperatorTest      = 0;
-   bool DestructorTest                 = 0;
-   bool BCDIntAssignmentTest           = 1;
+   bool BCDConstructorDefaultTest = 0; // Done
+   bool BCDtoStringTest = 0; // Done
+   bool BCDOperatorIntTest = 0; // Done
+   bool EqualityOperatorTest = 0; // Done
+   bool BCDConstructorByIntTest = 0; // Done
+   bool BCDnumDigitsTest = 0; // Done
+   bool BCDRemoveTest = 0; // Done
+   bool BCDObliterateTest = 0; // Done
+   bool BCDConstructorBCDTest = 0; // Done
+   bool BCDAssignmentOperatorTest = 0; // Done
+   bool LessThanOperatorTest = 0; // Done
+
+   bool DestructorTest = 0; // Not done - Test in Valgrind
+
+   bool BCDIntAssignmentTest = 0; // Done
+
+
+
+
+
+   bool OperatorPlusTest = 1;
+
 
    // Test of the BCD default constructor
    if (BCDConstructorDefaultTest == true) {
@@ -110,30 +123,65 @@ int main() {
       cout << "The number of digits should read 1:7. They are: " << numDigitsTest1.numDigits() << ":" << numDigitsTest2.numDigits() << endl;
    }
 
+   // Test of BCD remove() method: Helper method for clear()
+   if (BCDRemoveTest == true) {
+      cout << endl << "BCD Remove() test:" << endl;
+      BCD target(12345);
+
+      target.remove(target.headptr->moreSDptr);
+      cout << "Target condition (1234): " << target << endl; // Expected 1234
+      cout << "isLastNode()" << target.isLastNode(target.headptr) << endl << endl;
+      target.remove(target.headptr->lessSDptr);
+      cout << "Target condition (234): " << target << endl; // Expected 234
+      cout << "isLastNode()" << target.isLastNode(target.headptr) << endl << endl;
+      target.remove(target.headptr->lessSDptr);
+      cout << "Target condition (34): " << target << endl; // Expected 34
+      cout << "isLastNode()" << target.isLastNode(target.headptr) << endl << endl;
+      target.remove(target.headptr->lessSDptr);
+      cout << "Target condition (4): " << target << endl; // Expected 4
+      cout << "isLastNode()" << target.isLastNode(target.headptr) << endl << endl;
+      target.remove(target.headptr->lessSDptr);
+      cout << "Target condition (-): " << target << endl; // Expected -
+      cout << "isLastNode()" << target.isLastNode(target.headptr) << endl << endl;
+      cout << "Head deleted == " << target.remove(target.headptr); // This line requires that remove() return something (such as a bool)
+      // Attempting to cout with a fully empty BCD will probably cause an exception.
+   }
+
+   // Test of BCD obliterate() method (a.k.a. clear() - renamed to avoid naming conflict with String method of same name)
+   if (BCDObliterateTest == true) {
+      cout << endl << "BCD Remove() test:" << endl;
+      BCD obliterateTest(123456789);
+      obliterateTest.obliterate();
+      cout << "Output of deleted BCD: " << obliterateTest.toString() << "<end output>" << endl;
+   }
+
+   // Test of BCD Constructor by BCD
+   if (BCDConstructorBCDTest == true) {
+      BCD original(123123123);
+      cout << "Contents of original: " << original << endl;
+      cout << "Generating copy..." << endl;
+      BCD copy(original);
+      cout << "Contents of copy: " << copy << endl;
+      cout << "Address pointed at by headpointers (original:copy)" << original.headptr << ":" << copy.headptr << endl;
+      cout << "           Address of headpointers (original:copy)" << &original.headptr << ":" << &copy.headptr << endl;
+   }
+
    // Test of assignment operator overload (=)
    if (BCDAssignmentOperatorTest == true) {
       cout << endl << "BCD Assignment Operator test:" << endl;
-      BCD identity1;
-      BCD identity2;
-      cout << "Address of Identity1: " << &identity1 << endl;
-      cout << "Address of Identity2: " << &identity2 << endl;
-
-      cout << "Address of ID1.headptr: " << identity1.headptr << endl;
-      cout << "Address of ID2.headptr: " << identity2.headptr << endl;
+      BCD identity1(123);
+      BCD identity2(456);
+      cout << "Address comparison (ID1): " << &identity1 << " : " << identity1.headptr << endl << endl;
+      cout << "Address comparison (ID2): " << &identity2 << " : " << identity2.headptr << endl << endl;
 
       cout << "Performing self-assignment... " << endl;
       identity1 = identity1;
-      cout << "Address of ID1: " << &identity1 << endl;
-      cout << "Address of ID1.headptr: " << identity1.headptr << endl;
-      cout << "Above addresses should match old ID1 and ID1.headptr addresses." << endl;
+      cout << "Address comparison (ID1): " << &identity1 << " : " << identity1.headptr << endl << endl;
 
       cout << "Performing other-assignment... " << endl;
       identity1 = identity2;
-      cout << "Address of Identity1: " << &identity1 << endl;
-      cout << "Address of Identity2: " << &identity2 << endl;
-      cout << "Address of ID1.headptr: " << identity1.headptr << endl;
-      cout << "Address of ID2.headptr: " << identity2.headptr << endl;
-      cout << "Address of ID1, ID2, and ID2.headptr should remain unchanged." << endl << "Address of ID1.headptr should be new." << endl;
+      cout << "Address comparison (ID1): " << &identity1 << " : " << identity1.headptr << endl << endl;
+      cout << "Address comparison (ID2): " << &identity2 << " : " << identity2.headptr << endl << endl;
    }
 
    // Test of BCD destructor ~BCD()
@@ -153,6 +201,21 @@ int main() {
       BCD destructThis(24682468);
    } // Destructor (~BCD*()) gets called right here
 
+   // Test of the Less Than comparison operator
+   if (LessThanOperatorTest == true) {
+      cout << endl << "Comparison operator < test:" << endl;
+      BCD term1(1234);
+      BCD term2(-4321);
+      BCD term3(1234);
+      cout << "T1 == T2? (0) : " << (term1 == term2) << endl;
+      cout << "T1 >  T2? (1) : " << (term1 >  term2) << endl;
+      cout << "T1 <  T2? (0) : " << (term1 <  term2) << endl;
+      cout << "T1 == T3? (1) : " << (term1 == term3) << endl;
+      cout << "T2 <= T3? (1) : " << (term2 <= term3) << endl;
+      cout << "T2 >= T3? (0) : " << (term2 >= term3) << endl;
+      cout << "T1 >= T3? (1) : " << (term1 >= term3) << endl;
+   }
+
    // Test of BCD int assignment
    if (BCDIntAssignmentTest == true) {
       cout << endl << "BCD Int Assignment test:" << endl;
@@ -160,48 +223,45 @@ int main() {
       BCD assignmentTest = 13579;
       cout << "The value of the test BCD is: " << assignmentTest.toString() << endl;
    }
-     
-     if (true) {
-     int someInt = 12345;
-     BCD destructorTest(someInt);
-     }
 
-     int a = 123456;
-     int b = 12341123;
+   // Test of Operator+ overload
+   if (OperatorPlusTest == true) {
+      cout << endl << "Operator+ test:" << endl;
+      BCD term1(123);
+      BCD term2(333);
+      cout << "Term1: " << term1.toString() << endl;
+      cout << "Term2: " << term2.toString() << endl;
+      term1 + term2;
+      cout << "Operator+ completed successfully." << endl;
+   }
 
-     BCD n1(a);
-     cout << "Start N1 " << n1 << endl;
-     BCD n2(b);
-     cout << "Start N2 " << n2 << endl;
+   // TODO: Program is breaking here
+//   n1 + n2;
+//   n1 - n2;
 
-     cout << "Converted 125 (int) to " << n2 << " BCD" << endl;
-     // TODO: Program is breaking here
-     n1 = n1 + n2;
-     cout << "Did we reach this?" << endl;
-     n1 - n2;
+//   n1 = n2 + b;
+   cout << "Final test complete!" << endl;
+   /*
+   cout << n2 << " + 975 (int) = " << n1 << endl;
 
-     n1 = n2 + b;
-     cout << "Final test complete!" << endl;
-     /*
-     cout << n2 << " + 975 (int) = " << n1 << endl;
+   cin >> n2;
+   cout << "Input " << n2 << endl;
 
-     cin >> n2;
-     cout << "Input " << n2 << endl;
+   BCD n3 = 64;
+   cout << "Converted 64 (int) to " << n3 << " BCD" << endl;
 
-     BCD n3 = 64;
-     cout << "Converted 64 (int) to " << n3 << " BCD" << endl;
+   BCD sum = n1 + n3;
+   BCD difference = n1 - n3;
+   BCD product = n1 * n3;
+   BCD quotient = n1 / n3;
+   cout << n1 << " + " << n3 << " = " << sum;
+   cout << n1 << " - " << n3 << " = " << difference;
+   cout << n1 << " * " << n3 << " = " << product;
+   cout << n1 << " / " << n3 << " = " << quotient;
 
-     BCD sum = n1 + n3;
-     BCD difference = n1 - n3;
-     BCD product = n1 * n3;
-     BCD quotient = n1 / n3;
-     cout << n1 << " + " << n3 << " = " << sum;
-     cout << n1 << " - " << n3 << " = " << difference;
-     cout << n1 << " * " << n3 << " = " << product;
-     cout << n1 << " / " << n3 << " = " << quotient;
-
-     cout << product << " has " << product.numDigits() << " digits" << endl;
-     */
+   cout << product << " has " << product.numDigits() << " digits" << endl;
+   
+   */
 
    return (0);
 }
