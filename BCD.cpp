@@ -158,7 +158,7 @@ BCD::BCD(int someInt) {
    if (someInt < 0) {
       isPositive = false;
       // Reverse the sign of the received int so BCD formation is performed with all positive nodes
-      cout << "Achtung! This is negative!" << endl;
+      //cout << "Achtung! This is negative!" << endl;
       someInt = someInt * -1;
    }
    else {
@@ -169,19 +169,19 @@ BCD::BCD(int someInt) {
    headptr = new BCDnode();
    // Generates new node with value of the LSD of the int passed, headptr set to both 'next' and 'prev'
    // Make the first body node
-   cout << someInt << endl;
+   // cout << someInt << endl; // DEBUG
    BCDnode* body = new BCDnode((someInt % 10), headptr, headptr);
    headptr->lessSDptr = body;
    headptr->moreSDptr = body; // 4 of 4 pointers are set
    someInt = someInt / 10; // Divide
-   cout << someInt << endl;
+   // cout << someInt << endl; // DEBUG
 
    while (someInt > 0) { // Breaks after Most SigDigit is divided by 10
       insertMSD(someInt % 10); // Remainder of the int when divided by 10 is always the least significant digit
       someInt = someInt / 10; // Drop the Least SigDigit from someInt
-      cout << someInt << endl;
+      // cout << someInt << endl; // DEBUG
    }
-   cout << "BCD created. Its value is: " << this->toString() << endl << endl;
+   //cout << "BCD created. Its value is: " << this->toString() << endl << endl;
 }
 
 // #ConstructorBCD - Copy Constructor - Page 246
@@ -213,19 +213,13 @@ BCD::BCD(const BCD& someBCD) {
 // #~BCD() - Destructor - Page 245-246
 // Deletes all nodes in a list (appears to work as of 10.27
 BCD::~BCD() {
-   cout << "~BCD Destructor. Address of targetted headptr is:" << endl << &headptr << endl;
+//   cout << "~BCD Destructor. Address of targetted headptr is:" << endl << &headptr << endl;
 //   obliterate(headptr); // Turning off temporarily
-   if (false) {
-      BCDnode* currTgtPtr;
-      currTgtPtr = headptr->moreSDptr;
-      while (currTgtPtr != headptr) {
-         cout << endl << "Address of currTarget in obliterate(): " << &currTgtPtr << "(" << currTgtPtr->data << ")" << endl;
-         remove(currTgtPtr);
-         currTgtPtr = headptr->lessSDptr;
-         cout << endl << "CurrTarget changed to address: " << &currTgtPtr << endl << endl;
-      }
+//    TODO: Verify that destructor works
+   if (true) {
+      obliterate();
    }
-   cout << "~BCD Destructor complete. Linked list destroyed." << endl << endl;
+//   cout << "~BCD Destructor complete. Linked list destroyed." << endl << endl;
 }
 
 
@@ -286,12 +280,12 @@ bool BCD::operator<(const BCD& someBCD) const {
    else {
       // Compare BCD sign. If unequal, these are not equal
       if (isPositive > someBCD.isPositive) {
-         cout << "Mismatch! Different sign!" << endl; // DEBUG
+         //cout << "Mismatch! Different sign!" << endl; // DEBUG
          return(false);
       }
       // Otherwise, compare BCD length. If unequal, these are not equal
       else if (numDigits() < someBCD.numDigits()) {
-         cout << "Mismatch! Different list length!" << endl; // DEBUG
+         //cout << "Mismatch! Different list length!" << endl; // DEBUG
          return(true);
       }
       // Both sign and length are equal, begin node by node comparison:
@@ -302,7 +296,7 @@ bool BCD::operator<(const BCD& someBCD) const {
          while (currT1 != headptr) {
             // Compare the data of the current nodes. If different, these are not equal.
             if (currT1->data > currT2->data) {
-               cout << "Mismatch! Different node data!" << endl; // DEBUG
+               //cout << "Mismatch! Different node data!" << endl; // DEBUG
                // Positive comparison case
                if (isPositive == true) {
                   return(false);
@@ -337,12 +331,12 @@ bool BCD::operator==(const BCD& someBCD) const {
    else {
       // Compare BCD sign. If unequal, these are not equal
       if (isPositive != someBCD.isPositive) {
-         cout << "Mismatch! Different sign!" << endl; // DEBUG
+         //cout << "Mismatch! Different sign!" << endl; // DEBUG
          return(false);
       }
       // Otherwise, compare BCD length. If unequal, these are not equal
       else if (numDigits() != someBCD.numDigits()) {
-         cout << "Mismatch! Different list length!" << endl; // DEBUG
+         //cout << "Mismatch! Different list length!" << endl; // DEBUG
          return(false);
       }
       // Both sign and length are equal, begin node by node comparison:
@@ -353,7 +347,7 @@ bool BCD::operator==(const BCD& someBCD) const {
          while (currT1 != headptr) {
             // Compare the data of the current nodes. If different, these are not equal.
             if (currT1->data != currT2->data) {
-               cout << "Mismatch! Different node data!" << endl; // DEBUG
+               //cout << "Mismatch! Different node data!" << endl; // DEBUG
                return(false);
             }
             // If the nodes' data is the same, advance to the next MoreSD.
@@ -376,8 +370,8 @@ bool BCD::operator==(const BCD& someBCD) const {
 // Return value:
 // Functions called: 
 BCD& BCD::operator=(const BCD& rightHandSide) {
-   cout << "Starting operator=" << endl;
-   cout << "RHS: " << rightHandSide.toString() << endl;
+   //cout << "Starting operator=" << endl;
+   //cout << "RHS: " << rightHandSide.toString() << endl;
    if (this != &rightHandSide) {
       this->obliterate();
       this->deepcopy(rightHandSide);
@@ -385,7 +379,7 @@ BCD& BCD::operator=(const BCD& rightHandSide) {
       this->length = rightHandSide.length;
       this->isPositive = rightHandSide.isPositive;
    }
-   cout << "Operator= complete... returning *this: " << this->toString() << endl;
+   //cout << "Operator= complete... returning *this: " << this->toString() << endl;
    return *this;
 }
 
@@ -432,16 +426,14 @@ const BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the in
 // Term1BCD exists
 // Term2BCD exists
 
-   cout << "Starting operator+: " << term1BCD.toString() << term2BCD.toString() << endl;
+   //cout << "Starting operator+: " << term1BCD.toString() << term2BCD.toString() << endl;
    if (term1BCD.isPositive == true && term2BCD.isPositive == true) {
-      cout << "Positive + Positive: so add()" << endl;
-      // TODO: Assign the positive flag within the .add function
-      return(term1BCD.add(term2BCD, true));
+      //cout << "Positive + Positive: so add()" << endl;
+      return(term1BCD.add(term2BCD, true)); // Result must be positive
    }
    else if (term1BCD.isPositive == false && term2BCD.isPositive == false) {
-      cout << "Negative + Negative: so add()" << endl;
-      // TODO: Assign the negative flag within the .add function
-      return(term1BCD.add(term2BCD, false));
+//cout << "Negative + Negative: so add()" << endl;
+return(term1BCD.add(term2BCD, false)); // Result must be negative
    }
    else {
       // BIG + small => Delta is |T1| - |T2|
@@ -478,31 +470,90 @@ const BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the in
 // Functions called: BCD::BCD(int) - Converts an int to a BCD object
 BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
 
-   cout << "Starting operator-()" << term1BCD.toString() << term2BCD.toString() << endl;
-   BCD diffBCD; // Generate a sumBCD with value set to 0.
-                // < Implement addition logic here >
-                // Step 1, set current for all BCDs to Least SigDigit
-                // currT1 = term1BCD.headptr->moreSDptr;
-                // currT2 = term2BCD.headptr->moreSDptr;
-                // currSum = sumBCD.headptr->moreSDptr;
-   diffBCD = term1BCD.subtract(term2BCD,true);
-   /*   if (term1BCD.isPositive && term2BCD.isPositive || !term1BCD.isPositive && !term2BCD.isPositive) {
-   cout << "Both terms are positive or both are negative, so subtract()" << endl;
-   diffBCD = term1BCD.subtract(term2BCD);
+   //cout << "Starting operator-()" << term1BCD.toString() << term2BCD.toString() << endl;
+   if (term1BCD.isPositive == true && term2BCD.isPositive == false) {
+      //cout << "Positive - Negative: so add()" << endl;
+      return(term1BCD.add(term2BCD, true)); // Result must be positive
    }
-   /*   else if (term1BCD.isPositive && !term2BCD.isPositive || !term1BCD.isPositive && term2BCD.isPositive) {
-   cout << "The terms are a mix of positive and negative, so add()" << endl;
-   // Determine which is greater, send that first
-   // Determine final sign, reserve it
-   bool reserveSign = true;
-   diffBCD = term1BCD.add(term2BCD);
-   diffBCD.isPositive = reserveSign;
+   else if (term1BCD.isPositive == false && term2BCD.isPositive == true) {
+      //cout << "Negative - Positive: so add()" << endl;
+      return(term1BCD.add(term2BCD, false)); // Result must be negative
    }
    else {
-   diffBCD = term1BCD.add(term2BCD);
+      // BIG - small
+      if (term1BCD.isGreaterMagnitudeThan(term2BCD)) {
+         // (++) - (+)
+         if (term1BCD.isPositive == true && term2BCD.isPositive == true) {
+            return(term1BCD.subtract(term2BCD, true)); // Result will be positive
+         }
+         // (--) - (-)
+         else {
+            return(term1BCD.subtract(term2BCD, false)); // Result will be negative
+         }
+      }
+
+      // small - BIG
+      else if (term2BCD.isGreaterMagnitudeThan(term1BCD)) {
+         // (+) - (++)
+         if (term1BCD.isPositive == true) {
+            return(term2BCD.subtract(term1BCD, false)); // Result will be negative
+         }
+         // (-) - (--)
+         else {
+            return(term2BCD.subtract(term1BCD, true)); // Result will be positive
+         }
+      }
+      // They're the same magnitude, but one is positive and one is negative
+      else {
+         return(BCD(0));
+      }
    }
-   */
-   return diffBCD;
+}
+
+// TODO: Comments
+const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
+   BCD product;
+   BCD tempProduct;
+   int nodeProduct;
+   BCD::BCDnode* T1curr = term1BCD.headptr->moreSDptr;
+   BCD::BCDnode* T2curr = term2BCD.headptr->moreSDptr;
+   // T1:
+   // 1-2-3
+   //     ^
+   // T2:
+   //   1-2
+   //     ^
+
+
+      // T2 :   1-2
+      //          ^
+   // For every digit in Term2...
+   for (int i = 0; i < term2BCD.numDigits(); i++) {
+      // T2 : 1-2-3
+      //          ^
+      // Against every digit in Term1...
+      for (int j = 0; j < term1BCD.numDigits(); j++) {
+         // Multiply the digit from Term2 against the digit from Term1
+         nodeProduct = T1curr->data * T2curr->data;
+         // For every loop in i-1, apply trailing zero
+         // Place node product at the MostSD
+         // Repeat node product calculation
+         }
+      }
+   }
+   cout << product;
+   return(product);
+}
+
+
+
+
+
+
+// TODO: Comments
+const BCD operator/(BCD& term1BCD, BCD& term2BCD) {
+   BCD product;
+   return(product);
 }
 
 // #isGreaterMagnitudeThan()
@@ -579,23 +630,15 @@ void const BCD::deepcopy(const BCD& target) {
 // Functions called: None
 // Breaks if an empty list is sent
 void BCD::obliterate() {
-   cout << "Start obliterate(): " << endl;
+//   cout << "Start obliterate(): " << endl;
    while (this->isLastNode(headptr)) {
       remove(headptr->lessSDptr);
    }
-   /*   BCDnode* currTarget = nullptr;
-      // Delete body nodes
-      while (currTarget != headptr) {
-         currTarget = headptr->lessSDptr;
-         cout << endl << "Address of currTarget in obliterate(): " << &currTarget << "(" << currTarget->data << ")" << endl;
-         remove(currTarget);
-
-         cout << endl << "CurrTarget changed to address: " << &currTarget << endl << endl;
-      }
-      cout << "Body nodes deleted" << endl; // DEBUG
+   // TODO: Delete headnode?
+      /* cout << "Body nodes deleted" << endl; // DEBUG
       cout << "Targeting head in obliterate() at address: " << headptr << endl; // DEBUG
       remove(headptr);
-   cout << "obliterate() destructors being called... " << endl;*/
+      cout << "obliterate() destructors being called... " << endl;*/
 }
 
 
@@ -607,13 +650,13 @@ void BCD::obliterate() {
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
 // Functions called: None
 BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to fully qualify method location before 'this' becomes available for use
-   cout << "Starting add()" << endl;
+   //cout << "Starting add()" << endl;
 
    int sum = 0;
    int addCarry = 0;
    BCD sumBCD;
-   cout << "Address of empty sumBCD: " << &sumBCD << endl;
-   cout << "Address of empty sumBCD headptr: " << &sumBCD.headptr << endl;
+   //cout << "Address of empty sumBCD: " << &sumBCD << endl;
+   //cout << "Address of empty sumBCD headptr: " << &sumBCD.headptr << endl;
    bool terminate = false;
 
    BCDnode* T1curr = this->headptr->moreSDptr;    // Set T1 current node to term1's first node
@@ -621,8 +664,8 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
    BCDnode* sumcurr = sumBCD.headptr->moreSDptr;  // Set the sum current node to sumBCD's first node
    // cout << "T1curr: " << T1curr->data << endl; // DEBUG
    // cout << "T2curr: " << T2curr->data << endl; // DEBUG
-   cout << "add(), Sumcurr: " << sumcurr->data << endl; // DEBUG
-   cout << "add(), Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
+   //cout << "add(), Sumcurr: " << sumcurr->data << endl; // DEBUG
+   //cout << "add(), Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
 
    // While both BCDs are not resting at the head node...
    while (terminate == false) {
@@ -673,9 +716,9 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
       }
    } // Closing while loop
    sumBCD.isPositive = isPositive;
-   cout << "sum of T1 and T2: " << sumBCD.toString() << endl; // DEBUG
-   cout << "Address of loaded sumBCD: " << &sumBCD << endl;
-   cout << "Returning sumBCD and add() destructors being called." << endl;
+   //cout << "sum of T1 and T2: " << sumBCD.toString() << endl; // DEBUG
+//   cout << "Address of loaded sumBCD: " << &sumBCD << endl;
+//   cout << "Returning sumBCD and add() destructors being called." << endl;
    // Send the sumBCD, now complete, back to whatever called this function
    return sumBCD; // TODO: Probably right here; we're returning a BCD that gets destructed in short order
                   // Although... isn't that the point? Generate a sum and then return it so it can be assigned to something else?
@@ -688,7 +731,7 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
 // Functions called: None
 BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
-   cout << "Starting subtract()" << endl;
+   //cout << "Starting subtract(). Term1: " << *this << " Term2: " << term2BCD << endl;
    // TODO - Implement subtract() logic
    int difference = 0;
    int tempBorrow = 0;
@@ -700,21 +743,17 @@ BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
    BCDnode* T1curr = this->headptr->moreSDptr; // Set T1 current node to term1's first node
    BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
    BCDnode* diffcurr = diffBCD.headptr->moreSDptr; // Set the sum current node to sumBCD's first node
-                                                   // cout << "T1curr: " << T1curr->data << endl; // DEBUG
-                                                   // cout << "T2curr: " << T2curr->data << endl; // DEBUG
-                                                   // cout << "Sumcurr: " << sumcurr->data << endl; // DEBUG
-                                                   // cout << "Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
 
-                                                   // While both BCDs are not resting at the head node...
+   // While both BCDs are not resting at the head node...
    while (terminate == false) {
       // Subtract the two terms...
       difference = (T1curr->data) - (T2curr->data) - diffcurr->borrow;
       // Borrow having been 'used', reset its value to 0
       diffcurr->borrow = 0;
-      // If difference is less than 0
+      // If difference is less than 0 (ie.  3 - 4 = -1
       if (difference < 0) {
          // add ten and assign result to the diffCurrent node's data field
-         diffcurr->data = difference + 10;
+         diffcurr->data = (difference + 10);
          // But because we had to add ten, increment the borrow on the next node by 1.
          tempBorrow = 1;
       }
@@ -733,20 +772,19 @@ BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
          T2curr = T2curr->moreSDptr;
       }
 
-      // cout << "T1curr: " << T1curr->data << endl; // DEBUG
-      // cout << "T2curr: " << T2curr->data << endl; // DEBUG
       // Test for exit condition, both T1curr and T2curr are back at the headptr and there is no carry to deal with.
       if (T1curr == this->headptr && T2curr == term2BCD.headptr && tempBorrow == 0) {
          terminate = true;
       }
       // If they aren't, we're going another round...
       else {
+
          // And the diffBCD will need another node for that.
          diffBCD.insertMSD(0);
-         // Assign the borrow value to the new node (0 or 1)
-         diffcurr->moreSDptr->borrow = tempBorrow;
          // Which we then advance to:
          diffcurr = diffcurr->moreSDptr;
+         // And assign the borrow value (0 or 1)
+         diffcurr->borrow = tempBorrow;
 
          // And re-zero our working variables so it doesn't muddle additions on the next cycle
          difference = 0;
@@ -754,14 +792,15 @@ BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
       }
    } // Closing while loop
 
-     // Trim the zeroes
-   while (diffBCD.headptr->lessSDptr->data == 0) {
+     // Trim the zeroes, but halt if the only node is 0.
+   while (diffBCD.headptr->lessSDptr->data == 0 && diffBCD.headptr->lessSDptr->lessSDptr != diffBCD.headptr) {
       diffBCD.remove(diffBCD.headptr->lessSDptr);
    }
 
-   cout << "difference of T1 and T2: " << diffBCD.toString() << endl;
+   //cout << "Magnitude difference of T1 and T2: " << diffBCD.toString() << endl;
+   // Add the sign
+   diffBCD.isPositive = isPositive;
    // Send the sumBCD, now complete, back to whatever called this function
-
    return(diffBCD);
 }
 
@@ -778,7 +817,7 @@ const bool BCD::isLastNode(BCDnode* someNodeptr) {
    // If the passed node's lessSDptr or moreSDptr point to the head, then this is a last node.
    if (someNodeptr->lessSDptr == headptr || someNodeptr->moreSDptr == headptr) {
       isLast = true;
-      cout << "Head node located." << endl; // DEBUG
+      //cout << "Head node located." << endl; // DEBUG
    }
    // Return flag status
    return(isLast);
@@ -842,12 +881,12 @@ int BCD::numDigits() const {
 // Functions called: None
 bool BCD::remove(BCDnode* target) {
    if (target == nullptr) {
-      cout << "ACHTUNG! remove() has been passed a nullptr. Breaking.";
+      //cout << "ACHTUNG! remove() has been passed a nullptr. Breaking.";
       return(false);
    }
    //   cout << "Start remove(). Address of remove() target: " << &target << endl; // DEBUG
    BCDnode targetNode = *target;
-   cout << targetNode.data;
+   //cout << targetNode.data;
 
    //   cout << "Redirecting pointers around target" << endl; // DEBUG
    target->moreSDptr->lessSDptr = target->lessSDptr;
