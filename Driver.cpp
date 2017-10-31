@@ -5,36 +5,35 @@ using namespace std;
 
 int main() {
    // Control variables
-   bool BCDConstructorDefaultTest = 0; // Done
-   bool BCDtoStringTest = 0; // Done
-   bool BCDOperatorIntTest = 0; // Done
-   bool EqualityOperatorTest = 0; // Done
-   bool BCDConstructorByIntTest = 0; // Done
-   bool BCDnumDigitsTest = 0; // Done
-   bool BCDRemoveTest = 0; // Done
-   bool BCDObliterateTest = 0; // Done
-   bool BCDConstructorBCDTest = 0; // Done
-   bool BCDAssignmentOperatorTest = 0; // Done
-   bool LessThanOperatorTest = 0; // Done
+   bool BCDConstructorDefaultTest = 1; // Done
+   bool BCDtoStringTest = 1; // Done
+   bool BCDOperatorIntTest = 1; // Done
+   bool EqualityOperatorTest = 1; // Done
+   bool BCDConstructorByIntTest = 1; // Done
+   bool BCDnumDigitsTest = 1; // Done
+   bool BCDRemoveTest = 1; // Done
+   bool BCDObliterateTest = 1; // Done
+   bool BCDConstructorBCDTest = 1; // Done
+   bool BCDAssignmentOperatorTest = 1; // Done
+   bool LessThanOperatorTest = 1; // Done
 
-   bool DestructorTest = 0; // Not done - Test in Valgrind
+   bool DestructorTest = 1; // Not done - Test in Valgrind
 
-   bool BCDIntAssignmentTest = 0; // Done
-   bool MagnitudeTest = 0; // Done
-   bool OperatorPlusTest = 0; // Done
-   bool PlusAndAssignTest = 0; // Done
-   bool cinDebugTest = 0; // Done - Confirm that the program can pull content in from cin.
+   bool BCDIntAssignmentTest = 1; // Done
+   bool MagnitudeTest = 1; // Done
+   bool OperatorPlusTest = 1; // Done
+   bool PlusAndAssignTest = 1; // Done
+   bool cinDebugTest = 1; // Done - Confirm that the program can pull content in from cin.
    // In Visual Studio 2017, go to Debug > Project Properties... > Configuration Properties > Debugging > Command Arguments > Edit...
    // Enter '< someTextFileName.txt' (sans single quotes)
    // The above text file should be located in your project directory adjacent your source files, containing valid data entries
    // In this case, whitespace delimited integers.
    // The text file may be located elsewhere, but the command argument file path will need to be adjusted accordingly.
-   bool cinBCDTest = 0; // Done
-
-   bool OperatorPlusTestII = 1; // Not done, Subtract() must be implemented
-
-   bool OperatorMinusTest = 1;
-
+   bool cinBCDTest = 1; // Done
+   bool OperatorPlusTestII = 1; // Done
+   bool OperatorMinusTest = 1; // Done
+   bool LimitBreakerTest = 1; // Done
+   bool OperatorMultiply = 1; // Not done
 
 
    // Test of the BCD default constructor
@@ -272,10 +271,10 @@ int main() {
       cout << endl << "Operator+ and Operator= test:" << endl;
       BCD term1(123); 
       BCD term2(654);
-      cout << term1 << term2 << endl;
+      // cout << term1 << term2 << endl; // DEBUG
 
       BCD term3 = term1 + term2;
-      cout << term3 << endl;
+      // cout << term3 << endl; // DEBUG
       cout << "If result is '777', Operator+ and Operator= overload test completed successfully." << endl;
    }
 
@@ -300,28 +299,132 @@ int main() {
    // Test of Operator+ overload, round II
    if (OperatorPlusTestII == true) {
       cout << endl << "Operator+ test:" << endl;
-      BCD term1(-1234);
-      BCD term2(-678);
-      cout << "Term1: " << term1.toString() << endl;
-      cout << "Term2: " << term2.toString() << endl;
-      term1 + term2;
+      BCD term1(99345);
+      BCD term2(654);
+      BCD sum1;
+
+      BCD term3(-99345);
+      BCD term4(-654);
+      BCD sum2;
+
+      BCD term5(100122);
+      BCD term6(-123);
+      BCD sum3;
+
+      BCD term7(-100122);
+      BCD term8(123);
+      BCD sum4;
+
+      sum1 = term1 + term2;
+      sum2 = term3 + term4;
+      sum3 = term5 + term6;
+      sum4 = term7 + term8;
+
       cout << "Operator+ completed successfully." << endl;
+
+      cout << "Results sum1 (expect +99999): " << sum1 << endl;
+      cout << "Results sum2 (expect -99999): " << sum2 << endl;
+      cout << "Results sum3 (expect +99999): " << sum3 << endl;
+      cout << "Results sum4 (expect -99999): " << sum4 << endl;
+
+      cout << "Updating sums..." << endl;
+
+      sum1 = term2 + term1;
+      sum2 = term3 + term4;
+      sum3 = term5 + term6;
+      sum4 = term7 + term8;
+
+      cout << "Results sum1 (expect +99999): " << sum1 << endl;
+      cout << "Results sum2 (expect -99999): " << sum2 << endl;
+      cout << "Results sum3 (expect +99999): " << sum3 << endl;
+      cout << "Results sum4 (expect -99999): " << sum4 << endl;
+
+      cout << "Updating sums for negation..." << endl;
+
+      sum1 = term1 + term3;
+      sum2 = term4 + term2;
+      sum3 = term7 + term5;
+      sum4 = term8 + term6;
+
+      cout << "Results sum1 (expect +0): " << sum1 << endl;
+      cout << "Results sum2 (expect +0): " << sum2 << endl;
+      cout << "Results sum3 (expect +0): " << sum3 << endl;
+      cout << "Results sum4 (expect +0): " << sum4 << endl;
    }
 
    // Test of Operator- overload
-   if (cinBCDTest == true) {
-      cout << endl << "Operator+ test:" << endl;
-      BCD term1(334);
-      BCD term2(-333);
-      cout << "Term1: " << term1.toString() << endl;
-      cout << "Term2: " << term2.toString() << endl;
-      term1 - term2;
+   if (OperatorMinusTest == true) {
+      cout << endl << "Operator- test:" << endl;
+      BCD term1(100122);
+      BCD term2(123);
+      BCD sum1;
+
+      BCD term3(-100122);
+      BCD term4(-123);
+      BCD sum2;
+
+      BCD term5(99876);
+      BCD term6(-123);
+      BCD sum3;
+
+      BCD term7(-99876);
+      BCD term8(123);
+      BCD sum4;
+
+      sum1 = term1 - term2; // +99999
+      sum2 = term3 - term4; // -99999
+      sum3 = term5 - term6; // +99999
+      sum4 = term7 - term8; // -99999
+
+      cout << "Results sum1 (expect +99999): " << sum1 << endl;
+      cout << "Results sum2 (expect -99999): " << sum2 << endl;
+      cout << "Results sum3 (expect +99999): " << sum3 << endl;
+      cout << "Results sum4 (expect -99999): " << sum4 << endl;
+
+      cout << "Updating sums..." << endl;
+
+      sum1 = term2 - term1; // -99999
+      sum2 = term4 - term3; // +99999
+      sum3 = term6 - term5; // -99999
+      sum4 = term8 - term7; // +99999
+
+      cout << "Results sum1 (expect -99999): " << sum1 << endl;
+      cout << "Results sum2 (expect +99999): " << sum2 << endl;
+      cout << "Results sum3 (expect -99999): " << sum3 << endl;
+      cout << "Results sum4 (expect +99999): " << sum4 << endl;
+
+      cout << "Updating sums for negation..." << endl;
+
+      sum1 = term1 - term5 - term8 - term8; // 0
+      sum2 = term3 - term7 - term4 - term4; // 0
+      sum3 = term5 - term1 - term6 - term6; // 0
+      sum4 = term7 - term3 - term8 - term8; // 0
+
+      cout << "Results sum1 (expect +0): " << sum1 << endl;
+      cout << "Results sum2 (expect +0): " << sum2 << endl;
+      cout << "Results sum3 (expect +0): " << sum3 << endl;
+      cout << "Results sum4 (expect +0): " << sum4 << endl;
+
       cout << "Operator- completed successfully." << endl;
    }
 
+   // Test of breaking 'int' limit
+   if (LimitBreakerTest == true) {
+      cout << endl << "Limit Breaker test:" << endl;
+      BCD term1(2147483647);
+      BCD term2(2147483647);
+      BCD sum1 = term1 + term2;
+      cout << "Sum1: " << sum1 << endl;
+   }
 
-
-
+   // Test of multiply operator
+   if (OperatorMultiply == true) {
+      cout << endl << "Multiplication test:" << endl;
+      BCD term1(123);
+      BCD term2(12);
+      BCD product = term1 * term2;
+      cout << "Product: " << product << endl;
+   }
 
    cout << "Final test complete!" << endl;
    /*
