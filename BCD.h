@@ -227,15 +227,19 @@ public:
    // const <return type> <method name>( <arguments> );
    // e.g. const bool checkIfLastCard();
 
+   // TODO: Comments
    // #obliterate()
    void obliterate();
 
+   // TODO: Comments
    // #remove()
    bool remove(BCDnode* target);
 
+   // TODO: Comments
    // #add()
    BCD const add(const BCD& term2BCD, bool isPositive) const;
 
+   // TODO: Comments
    // #subtract()
    BCD const subtract(const BCD& term2BCD, bool isPositive) const;
 
@@ -279,40 +283,53 @@ public:
    // Functions called: None
    const string toString() const;
 
+   // TODO: Comments
    //#isGreaterMagnitudeThan()
    bool const isGreaterMagnitudeThan(const BCD& term2);
 
+   // TODO: Comments
    //#deepcopy()
    void const deepcopy(const BCD& target);
 
+   // TODO: Comments
    operator int() const;
 
+   // TODO: Comments
    // Per pg. 436 - Modeled after operator== overload
    // bool operator<(const LinkedList<ItemType>& rightHandSide) const;
    bool operator<(const BCD& someBCD) const;
 
+   // TODO: Comments
    // Per pg. 436
    // bool operator==(const LinkedList<ItemType>& rightHandSide) const;
    bool operator==(const BCD& someBCD) const;
 
+   // TODO: Comments
    // Per pg. 438
    // #operator=
+   // = - Custom behavior for the assignment operator when dealing with a BCD object (left) and a BCD object (right)
+   // Parameters: 
+   // Preconditions: 
+   // Postconditions: 
+   // Return value: 
+   // Functions called: 
    // Method returns a reference to the receiving object
    // LinkedList<ItemType>& operator=(const LinkedList<ItemType>& rightHandSide);
    // Must include BCD:: to make this a 'member function', otherwise it's global.
    BCD& BCD::operator=(const BCD& someBCD);
 
-   // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a PunchCard object (right)
-   // Parameters: thisLine - Used to store successive lines of data from cin.
-   // Preconditions: Content must be loaded to cin, terminated by newline characters.
-   // Postconditions: inputArray will be loaded with the first 80 characters of the first 12 lines of input from cin.
-   // Return value: None
-   // Functions called: getline - Pulls the first line of data from cin
+   // TODO: Comments
+   // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a BCD object (right)
+   // Parameters: 
+   // Preconditions: 
+   // Postconditions: 
+   // Return value: 
+   // Functions called: 
    // If it's in the class definition, include 'friend'
    friend istream& operator>>(istream& cinData, BCD& someBCD);
    //     inputStream (by reference) operator-named->> ( <left argument type>(by reference) <left argument name>, <right argument type>(by reference) <right argument name>);
 
-   // >> - Custom behavior for the extraction operator when dealing with an ostream object (left) and a BCD object (right)
+   // << - Custom behavior for the extraction operator when dealing with an ostream object (left) and a BCD object (right)
    // Parameters: thisNumber - Used to store successive digits to be sent to 'cout'.
    // Preconditions: None
    // Postconditions: String representation of the BCD object will be sent to 'cout'.
@@ -329,7 +346,16 @@ public:
    // Functions called: BCD::BCD(int) - Converts an int to a BCD object
    friend const BCD BCD::operator+(BCD& term1BCD, BCD& term2BCD);
 
+
+   //TODO: Comments
    friend BCD operator-(BCD& term1BCD, BCD& term2BCD);
+
+   //TODO: Comments
+   friend const BCD operator*(BCD& term1BCD, BCD& term2BCD);
+
+   //TODO: Comments
+   friend const BCD operator/(BCD& term1BCD, BCD& term2BCD);
+
 
    //   friend const BCD& operator=(const BCD& someBCD);
 
