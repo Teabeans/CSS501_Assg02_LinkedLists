@@ -1054,68 +1054,87 @@ T2curr = T2curr->moreSDptr;
 const BCD operator/(BCD& numer, BCD& denom) {
    BCD result;
    BCD sacriNumer = numer;
+   BCD sacriDenom = denom;
    BCD numerSubset = 0;
-   int counter;
+   int counter = 0;
+   bool tempSign = true;
    BCD::BCDnode* sacriCurr = sacriNumer.headptr->lessSDptr;
 
+   // Assign the sign
+   if (numer.isPositive != sacriDenom.isPositive) {
+      tempSign = false;
+   }
+
+   // Ensure that both numerator and denominator are treated as positives during algebraic manipulations.
+   if (sacriNumer.isPositive != true) {
+      sacriNumer.isPositive = true;
+   }
+   if (sacriDenom.isPositive != true) {
+      sacriDenom.isPositive = true;
+   }
+
    // Divide by zero case
-   if (0 == denom) {
+   if (0 == sacriDenom) {
       // Implode
       throw std::invalid_argument("+++ Divide by cucumber error +++");
    }
 
+
+
+
    // Denominator (denom) bigger than numerator (numer)
-   else if (denom > numer) {
+   else if (sacriDenom > numer) {
       result = 0;
+      return (result);
    }
 
    // Numerator is bigger than denominator
    else {
-      // Special behavior if the subset is 0 (to avoid leading zeroes, the numbers must be drawn, then trimmed)
-      if (0 == numerSubset) {
-         for (int i = 0; i < denom.numDigits(); i++) {
+
+      while (sacriCurr != sacriNumer.headptr) {
+         // If numerator is not not big enough, keep grabbing numbers until it's bigger
+         while (numerSubset < sacriDenom) {
             // Make a new node
             numerSubset.insertLSD(sacriCurr->data);
-            // Advance sacrificial current pointer
+            // Advance sacrificial current pointer and append a zero to the result
             sacriCurr = sacriCurr->lessSDptr;
+            if (numerSubset < sacriDenom) {
+               result.insertLSD(0);
+            }
             // And delete the last number we were at (it can no longer be used)
             sacriNumer.remove(sacriCurr->moreSDptr);
+            // Also trim leading zeroes, as this will jack up equality operators tests later
+            if (numerSubset.headptr->lessSDptr->data == 0) {
+               numerSubset.remove(numerSubset.headptr->lessSDptr);
+            }
          }
-         // Trim leading zeroes. While the MostSigDigit is a zero...
-         while (numerSubset.headptr->lessSDptr->data == 0) {
-            // Remove the MostSigDigit
-            numerSubset.remove(numerSubset.headptr->lessSDptr);
-         }
-      }
-      // Matching length temp numerator made
+         // Numerator is guaranteed large enough
+         cout << "NumeratorSubset / Denominator : SacriNumer : " << numerSubset << " / " << sacriDenom << " : " << sacriNumer << endl;
 
-      // If numerator is not not big enough, keep grabbing numbers until it's bigger
-      while (numerSubset < denom) {
-         // Make a new node
-         numerSubset.insertLSD(sacriCurr->data);
-         // Advance sacrificial current pointer
-         sacriCurr = sacriCurr->lessSDptr;
-         // And delete the last number we were at (it can no longer be used)
-         sacriNumer.remove(sacriCurr->moreSDptr);
-      }
-      // Numerator is guaranteed large enough
-      cout << "NumeratorSubset / Denominator : SacriNumer : " << numerSubset << " / " << denom << " : " << sacriNumer << endl;
+         // Start mini subtractions while subtractions can be made
+         while (numerSubset >= sacriDenom) {
+            numerSubset = numerSubset - sacriDenom;
+            counter++;
+         } // 8:0, 6:1, 4:2, 2:3, 0:4
+         // numerator subset has been divided out as most it can be
+         // So place the counter number in the result string
+         result.insertLSD(counter);
+         // Used up the counter, so reset it to zero
+         counter = 0;
 
-      // Start mini subtractions
-      while (numerSubset > 0) {
-
-      }
+         cout << "Result: " << result << endl;
 
 
 
-
-
+      } // End while sacriCurr != headptr
 
 
    }
 
+   while (result.headptr->lessSDptr->data == 0) {
+      result.remove(result.headptr->lessSDptr);
+   }
 
-
-
+   result.isPositive = tempSign;
    return(result);
 }
