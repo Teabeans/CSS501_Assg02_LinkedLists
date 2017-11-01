@@ -108,8 +108,13 @@
 //
 // Run with:
 // valgrind --leak-check=full <file folder path>/<file name, usually a.out>
+// OR
+// valgrind --leak-check=full --show-leak-kinds=all <file path>/a.out
+//
 // ie.
 // valgrind --leak-check=full /home/Teabean/a.out
+// OR
+// valgrind --leak-check=full --show-leak-kinds=all /home/Teabean/a.out
 //
 // ---- BEGIN STUDENT CODE ----
 
@@ -594,23 +599,16 @@ ostream& operator<< (ostream& coutStream, BCD& someBCD) { // where 'cinData' is 
 }
 
 // #operator+ - Custom behavior for the addition operator when dealing with a BCD object (left) and a BCD object (right)
-// Parameters: term1BCD - The original BCD object being added to ; term2BCD - The BCD number being added to the term1BCD.
-// Preconditions: None
+// Parameters: this - The original BCD object being added to (implied) ; term2BCD - The BCD number being added to the term1BCD.
+// Preconditions: Two valid BCD objects exist
 // Postconditions: A new BCD object exists representing the summed addition of the old BCD and received BCD.
 // Return value: A new BCD object representing the summed addition
-// Functions called: BCD::BCD(int), add(), subtract()
-// const MyClass MyClass::operator+(const MyClass &other) const
-const BCD BCD::operator+(BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
-                                                    // Term1BCD exists
-                                                    // Term2BCD exists
-
-                                                    //cout << "Starting operator+: " << term1BCD.toString() << term2BCD.toString() << endl;
+// Functions called: BCD(int), add(), subtract(), isGreaterMagnitudeThan()
+const BCD BCD::operator+(BCD& term2BCD) {
    if (this->isPositive == true && term2BCD.isPositive == true) {
-      //cout << "Positive + Positive: so add()" << endl;
       return(this->add(term2BCD, true)); // Result must be positive
    }
    else if (this->isPositive == false && term2BCD.isPositive == false) {
-      //cout << "Negative + Negative: so add()" << endl;
       return(this->add(term2BCD, false)); // Result must be negative
    }
    else {
@@ -635,26 +633,22 @@ const BCD BCD::operator+(BCD& term2BCD) { // where 'someInt' is the input variab
       }
       // They're the same magnitude, but one is positive and one is negative
       else {
-         return(BCD(0));
+         return(BCD(0)); // Result is a negation, 0
       }
    }
-}
+} // Closing operator+
 
 // #operator- - Custom behavior for the subtraction operator when dealing with a BCD object (left) and a BCD object (right)
 // Parameters: term1BCD - The original BCD object being subtracted from ; term2BCD - The BCD number being subtracted from term1BCD.
 // Preconditions: None
 // Postconditions: A new BCD object exists representing the difference of the old BCD and received BCD.
 // Return value: A new BCD object representing the difference from subtraction
-// Functions called: BCD::BCD(int) - Converts an int to a BCD object
-BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
-
-                                              //cout << "Starting operator-()" << term1BCD.toString() << term2BCD.toString() << endl;
+// Functions called: BCD(int), add(), subtract, isGreaterMagnitudeThan()
+BCD operator-(BCD& term1BCD, BCD& term2BCD) {
    if (term1BCD.isPositive == true && term2BCD.isPositive == false) {
-      //cout << "Positive - Negative: so add()" << endl;
       return(term1BCD.add(term2BCD, true)); // Result must be positive
    }
    else if (term1BCD.isPositive == false && term2BCD.isPositive == true) {
-      //cout << "Negative - Positive: so add()" << endl;
       return(term1BCD.add(term2BCD, false)); // Result must be negative
    }
    else {
@@ -681,16 +675,19 @@ BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
             return(term2BCD.subtract(term1BCD, true)); // Result will be positive
          }
       }
-      // They're the same magnitude, but one is positive and one is negative
+      // They're the same magnitude, and both are positive or negative
       else {
-         return(BCD(0));
+         return(BCD(0)); // Result is a negation, 0
       }
    }
-}
+} // Closing operator-
 
-
-
-// #isGreaterMagnitudeThan()
+// #isGreaterMagnitudeThan() - Determines which term has a larger absolute value
+// Parameters: currT1 and CurrT2 - Used for iterative comparisons.
+// Preconditions: Two valid BCDs exist which can be compared
+// Postconditions: None
+// Return value: bool - True if the absolute value of T1 is greater than T2. False otherwise.
+// Functions called: None
 bool const BCD::isGreaterMagnitudeThan(const BCD& term2) {
    // If term1 is longer, then its magnitude must be greater
    if (this->numDigits() > term2.numDigits()) {
@@ -723,13 +720,16 @@ bool const BCD::isGreaterMagnitudeThan(const BCD& term2) {
    return(false);
 }
 
-// #deepcopy()
-// Precondition:
+// #deepcopy() - Generates a deep copy of the received target BCD.
+// Parameters: currT1 and CurrT2 - Used for iterative comparisons.
+// Preconditions: Two valid BCDs exist
+// Postconditions: The calling BCD's original content has been deallocated and replaced with nodes reflecting the target BCD.
+// Return value: None
+// Functions called: obliterate(), insertMSD()
 void const BCD::deepcopy(const BCD& target) {
-   //cout << "Starting deepcopy()" << endl; // DEBUG
    // Test if 'this' and 'target' are the same thing
    if (headptr == target.headptr) {
-      //cout << "Same target as this, so do nothing" << endl; // DEBUG
+      // Same target as this, so do nothing
    }
    else {
       // Delete all nodes associated with the headpointer (clean slate)
@@ -740,52 +740,40 @@ void const BCD::deepcopy(const BCD& target) {
       // Set current node to the target LeastSD
       BCDnode* curr = target.headptr->moreSDptr;
       // Generate a new body node, also copied from the current target
-      //cout << "deepcopy() curr->data: " << curr->data << endl;
       BCDnode* newBody = new BCDnode(curr->data, headptr, headptr); // 2/4 pointers set
-                                                                    // Connect remaining pointers
+      // Connect remaining pointers
       headptr->lessSDptr = newBody;
       headptr->moreSDptr = newBody; // 4/4 pointers are set
-                                    //cout << "Copying nodes... " << endl; // DEBUG
-                                    // Advance (possibly back to the head)
+      
+      // Advance (possibly back to the head)
       curr = curr->moreSDptr;
       while (curr != target.headptr) { // While we aren't back at the head...
-                                       //cout << "deepcopy() while loop curr->data: " << curr->data << endl;
-         insertMSD(curr->data); // Insert a new node at the MostSD using the current data field
-         curr = curr->moreSDptr; // Advance
+         // Insert a new node at the MostSD using the current data field
+         insertMSD(curr->data); 
+         // Advance
+         curr = curr->moreSDptr; 
       }
-      //cout << "Node copies completed:" << this->toString() << endl; // DEBUG
-   }
-}
-
-
-
-
+      // Node copies completed
+   } // Closing else
+} // Closing deepcopy()
 
 // #add() - Adds a BCD object to another BCD object
 // Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
-// Preconditions: None
+// Preconditions: Two valid BCDs exist
 // Postconditions: None
-// Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
-// Functions called: None
-BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to fully qualify method location before 'this' becomes available for use
-                                                                 //cout << "Starting add()" << endl;
-
+// Return value: A positive BCD representing the sum of two magnitudes
+// Functions called: insertMSD()
+// Need to fully qualify method location before 'this' becomes available for use
+BCD const BCD::add(const BCD& term2BCD, bool isPositive) const {
    int sum = 0;
    int addCarry = 0;
    BCD sumBCD;
-   //cout << "Address of empty sumBCD: " << &sumBCD << endl;
-   //cout << "Address of empty sumBCD headptr: " << &sumBCD.headptr << endl;
    bool terminate = false;
 
    BCDnode* T1curr = this->headptr->moreSDptr;    // Set T1 current node to term1's first node
    BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
    BCDnode* sumcurr = sumBCD.headptr->moreSDptr;  // Set the sum current node to sumBCD's first node
-                                                  // cout << "T1curr: " << T1curr->data << endl; // DEBUG
-                                                  // cout << "T2curr: " << T2curr->data << endl; // DEBUG
-                                                  //cout << "add(), Sumcurr: " << sumcurr->data << endl; // DEBUG
-                                                  //cout << "add(), Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
-
-                                                  // While both BCDs are not resting at the head node...
+   // While both BCDs are not resting at the head node...
    while (terminate == false) {
       // Sum the two terms...
       sum = (T1curr->data) + (T2curr->data) + sumcurr->carry;
@@ -802,7 +790,6 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
          // And assign the sum appropriately (carry is performed down below)
          sumcurr->data = sum;
       }
-      // cout << "sumcurr data: " << sumcurr->data << endl; // DEBUG
 
       // Advance T1 current node if it's not back on the head.
       if (T1curr != this->headptr) {
@@ -814,8 +801,6 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
          T2curr = T2curr->moreSDptr;
       }
 
-      // cout << "T1curr: " << T1curr->data << endl; // DEBUG
-      // cout << "T2curr: " << T2curr->data << endl; // DEBUG
       // Test for exit condition, both T1curr and T2curr are back at the headptr and there is no carry to deal with.
       if (T1curr == this->headptr && T2curr == term2BCD.headptr && addCarry == 0) {
          terminate = true;
@@ -834,27 +819,17 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
       }
    } // Closing while loop
    sumBCD.isPositive = isPositive;
-   //cout << "sum of T1 and T2: " << sumBCD.toString() << endl; // DEBUG
-   //   cout << "Address of loaded sumBCD: " << &sumBCD << endl;
-   //   cout << "Returning sumBCD and add() destructors being called." << endl;
    // Send the sumBCD, now complete, back to whatever called this function
-
-
-
-
-   return sumBCD; // TODO: Probably right here; we're returning a BCD that gets destructed in short order
-                  // Although... isn't that the point? Generate a sum and then return it so it can be assigned to something else?
-}
+   return sumBCD;
+} // Closing add()
 
 // #subtract() - Subtracts a BCD object from another BCD object
-// Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
+// Parameters: difference - Working variable used to store the integer difference of two nodes. tempBorrow - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. diffBCD - BCD object used to store successive addition operations.
 // Preconditions: The absolute value of the calling BCD must be greater or equal to the absolute value of the argument BCD.
 // Postconditions: A BCD representing the absolute magnitude btween the two BCDs exists. This BCD will be positive.
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
 // Functions called: None
 BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
-   //cout << "Starting subtract(). Term1: " << *this << " Term2: " << term2BCD << endl;
-   // TODO - Implement subtract() logic
    int difference = 0;
    int tempBorrow = 0;
    BCD diffBCD;
@@ -866,7 +841,7 @@ BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
    BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
    BCDnode* diffcurr = diffBCD.headptr->moreSDptr; // Set the sum current node to sumBCD's first node
 
-                                                   // While both BCDs are not resting at the head node...
+   // While both BCDs are not resting at the head node...
    while (terminate == false) {
       // Subtract the two terms...
       difference = (T1curr->data) - (T2curr->data) - diffcurr->borrow;
@@ -914,20 +889,19 @@ BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
       }
    } // Closing while loop
 
-     // Trim the zeroes, but halt if the only node is 0.
+   // Trim the zeroes, but halt if the only node is 0.
    while (diffBCD.headptr->lessSDptr->data == 0 && diffBCD.headptr->lessSDptr->lessSDptr != diffBCD.headptr) {
       diffBCD.remove(diffBCD.headptr->lessSDptr);
    }
 
-   //cout << "Magnitude difference of T1 and T2: " << diffBCD.toString() << endl;
    // Add the sign
    diffBCD.isPositive = isPositive;
    // Send the sumBCD, now complete, back to whatever called this function
    return(diffBCD);
-}
+} // Closing subtract()
 
 // #isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
-// Parameters: No internal fields
+// Parameters: isLast - Boolean storing the results of the test
 // Preconditions: None
 // Postconditions: None
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
@@ -950,7 +924,7 @@ const bool BCD::isLastNode(BCDnode* someNodeptr) {
 // Preconditions: None
 // Postconditions: A new node is inserted as the the most significant digit position in the BCD
 // Return value: None
-// Functions called: None
+// Functions called: BCDnode() constructor
 const void BCD::insertMSD(int someData) {
    BCDnode* oldMSD = headptr->lessSDptr;
    // Make a new node off in space. Its data is the argument passed. Its MSD pointer points to head, its LSD pointer points to the old MSD.
@@ -995,14 +969,12 @@ int BCD::numDigits() const {
    return(counter);
 }
 
-
-
-// #toString() - To return a string representation of the decoded PunchCard.
-// Parameters: returnString - Used to concatenate successive characters from the outputArray.
+// #toString() - To return a string representation of the BCD object.
+// Parameters: returnString - Used to concatenate successive digits from the BCD.
 // Preconditions: None
-// Postconditions: returnString is 80 characters in length, plus a newline character at its end.
-// Return value: A string, 80 characters in length, with a newline character at its end.
-// Functions called: None
+// Postconditions: None
+// Return value: A string representing the sequential digits in the BCD and a (-) sign prefix if negative.
+// Functions called: std::to_string() - To convert an int from a node data field to a string.
 const string BCD::toString() const {
    string returnString = "";
 
@@ -1012,11 +984,6 @@ const string BCD::toString() const {
    else if (isPositive == false) {
       returnString += "-";
    }
-   // Append the headptr dereference's nodeName to the returnString.
-   // returnString += headptr->nodeName;
-   // Append the first body pointer's nodeName to the returnString
-   // returnString += headptr->lessSDptr->nodeName;
-
    // Set the current node to the Most SigDigit
    BCDnode* currentNodeptr = headptr->lessSDptr;
    // While currentNodeptr is *not* back on the head...
@@ -1026,22 +993,32 @@ const string BCD::toString() const {
       // And move the current node to the next Less SigDigit
       currentNodeptr = currentNodeptr->lessSDptr;
    }
-
    return returnString;
-}
+} // closing toString();
 
-
-// TODO: Comments
-// #operator*
+// #operator* - Overload of the (*) operator for multiplication of two BCD objects.
+// Parameters: finalSum, tempProduct, nodeProduct, carry, T1curr, T2curr, ProductCurr (see below for descriptions)
+// Preconditions: Two valid BCD objects exist.
+// Postconditions: A new BCD exists representing the product of the two terms
+// Return value: A BCD representing the product
+// Functions called: numDigits(), insertLSD(), insertMSD()
 const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
-   BCD finalSum; // Sum of all temp products
-   BCD tempProduct; // Product of one line of multiplication
-   int nodeProduct; // Product of a single multiplication event
+   // Sum of all temp products - This gets returned
+   BCD finalSum; 
+   // Product of one line of multiplication
+   BCD tempProduct; 
+   // Product of a single multiplication event
+   int nodeProduct;
+   // Carry value if one node needs to send digits to an adjacent node
    int carry = 0;
+   // The current target of Term1
    BCD::BCDnode* T1curr = term1BCD.headptr->moreSDptr;
+   // The current target of Term2
    BCD::BCDnode* T2curr = term2BCD.headptr->moreSDptr;
+   // The current target of the tempProduct.
    BCD::BCDnode* ProductCurr;
 
+   // Times 0 case - result will be 0.
    if (0 == term1BCD || 0 == term2BCD) {
       finalSum = 0;
       return (finalSum);
@@ -1049,80 +1026,59 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
    // Otherwise...
    // For every digit in Term2...
    for (int i = 0; i < term2BCD.numDigits(); i++) {
-
-
       // Build the sub-product
-// Against every digit in Term1...
-for (int j = 0; j < term1BCD.numDigits(); j++) {
-   // Multiply the digits together
-   nodeProduct = T1curr->data * T2curr->data;
-   cout << i << ":" << j << ":" << T1curr->data << ":" << T2curr->data << ":" << nodeProduct << endl;
-   // Place node product at the MostSD
-   // Special case for the first round (since first node is already 0)
-   if (i == 0 && j == 0) {
-      // On the first round, the temp product's first node's data receives result directly.
-      tempProduct.headptr->moreSDptr->data = nodeProduct; // Note, may exceed 9, carries dealt with later
-      //cout << "Round 1, tempProduct: " << tempProduct << endl;
-   }
-   else {
-      tempProduct.insertMSD(nodeProduct); // Note, may exceed 9, carries dealt with later
-   }
-   // Advance term1 target
-   T1curr = T1curr->moreSDptr;
-   // Repeat node product calculation
-   //cout << "End of J loop, tempProduct: " << tempProduct << endl;
-}
-
-
-
-// Handle subproduct carries
-// Pointing at LSD of Temp Product
-ProductCurr = tempProduct.headptr->moreSDptr;
-
-// While we aren't back at the head...
-while (ProductCurr != tempProduct.headptr) {
-   // Add the carry (even if 0)
-   ProductCurr->data = ProductCurr->data + carry;
-   carry = 0;
-   if (ProductCurr->data > 9) {
-      // Extract how many tens there are...
-      carry = ProductCurr->data / 10;
-      // And set the node value to remainder of mod 10 division.
-      ProductCurr->data = ProductCurr->data % 10;
-   }
-   // If we're on the last node, but the carry will take us one more, add a node
-   if (ProductCurr->moreSDptr == tempProduct.headptr && carry > 0) {
-      tempProduct.insertMSD(0);
-   }
-   // Advance!
-   ProductCurr = ProductCurr->moreSDptr;
-   // And one additional node hop to get T1curr past the head and back onto its LeastSigDigit.
-   T1curr = term1BCD.headptr->moreSDptr;
-}
-//cout << "Temp product, carried: " << tempProduct << endl;
-// tempProduct now represents all multiplications with carries
-
-// Apply trailing zeros
-for (int k = 1; k < i; k++) { // Nothing happens on first digit of T2.
-   tempProduct.insertLSD(0);
-}
-
-//add subproduct to finalSum
-//cout << endl << "Adding..." << endl;
-//cout << "FinalSum before addition: " << finalSum.toString() << endl;
-
-//cout << "tempProd before addition: " << tempProduct << endl;
-finalSum = finalSum.add(tempProduct, true);
-tempProduct = 0;
-//cout << "tempProduct reset to zero. tempProduct: " << tempProduct << endl;
-//cout << "FinalSum after addition: " << finalSum << endl << endl;
-
-// Advance term 2
-T2curr = T2curr->moreSDptr;
-
+      // Against every digit in Term1...
+      for (int j = 0; j < term1BCD.numDigits(); j++) {
+         // Multiply the digits together
+         nodeProduct = T1curr->data * T2curr->data;
+         // Place node product at the MostSD
+         // Special case for the first round (since first node is already 0)
+         if (i == 0 && j == 0) {
+            // On the first round, the temp product's first node's data receives result directly.
+            tempProduct.headptr->moreSDptr->data = nodeProduct; // Note, may exceed 9, carries dealt with later
+            //cout << "Round 1, tempProduct: " << tempProduct << endl;
+         }
+         else {
+            tempProduct.insertMSD(nodeProduct); // Note, may exceed 9, carries dealt with later
+         }
+         // Advance term1 target
+         T1curr = T1curr->moreSDptr;
+         // Repeat node product calculation
+      }
+      // Handle subproduct carries
+      // Pointing at LSD of Temp Product
+      ProductCurr = tempProduct.headptr->moreSDptr;
+      // While we aren't back at the head...
+      while (ProductCurr != tempProduct.headptr) {
+         // Add the carry (even if 0)
+         ProductCurr->data = ProductCurr->data + carry;
+         carry = 0;
+         if (ProductCurr->data > 9) {
+            // Extract how many tens there are...
+            carry = ProductCurr->data / 10;
+            // And set the node value to remainder of mod 10 division.
+            ProductCurr->data = ProductCurr->data % 10;
+         }
+         // If we're on the last node, but the carry will take us one more, add a node
+         if (ProductCurr->moreSDptr == tempProduct.headptr && carry > 0) {
+            tempProduct.insertMSD(0);
+         }
+         // Advance!
+         ProductCurr = ProductCurr->moreSDptr;
+         // And one additional node hop to get T1curr past the head and back onto its LeastSigDigit.
+         T1curr = term1BCD.headptr->moreSDptr;
+      }
+      // tempProduct now represents all multiplications with carries
+      // Apply trailing zeros
+      for (int k = 1; k < i; k++) { // Nothing happens on first digit of T2.
+         tempProduct.insertLSD(0);
+      }
+      //add subproduct to finalSum
+      finalSum = finalSum.add(tempProduct, true);
+      tempProduct = 0;
+      // Advance term 2
+      T2curr = T2curr->moreSDptr;
    } // Repeat for next digit of term2
-
-   //cout << "Final sum: " << finalSum << endl << endl;
    // Assign sign
    if (term1BCD.isPositive != term2BCD.isPositive) {
       finalSum.isPositive = false;
@@ -1130,16 +1086,26 @@ T2curr = T2curr->moreSDptr;
    return(finalSum);
 }
 
-
-
-// TODO: Comments
+// #operator/ - Overload of the (/) operator for division of two BCD objects.
+// Parameters: result, sacriNumer, sacriDenom, numerSubset, counter, tempSign, sacriCurr (see below for descriptions)
+// Preconditions: Two valid BCD objects exist.
+// Postconditions: A new BCD exists representing the result of the two terms' division
+// Return value: A BCD representing the result
+// Functions called: insertLSD(), remove()
 const BCD operator/(BCD& numer, BCD& denom) {
+   // The returned result of the division operation
    BCD result;
+   // A working numerator, copied from the received argument. Used to shed the positive or negative nature of the received numerator.
    BCD sacriNumer = numer;
+   // A working denominator, used to shed the positive or negative nature of the received denominator.
    BCD sacriDenom = denom;
+   // A subset of the numerator. Longhand division is performed against this variable.
    BCD numerSubset = 0;
+   // A counter representing how many subtraction events take place between the sacriNumer and sacriDenom.
    int counter = 0;
+   // Temporary holder of the final result sign
    bool tempSign = true;
+   // Node pointer used to track the current position of the sacrificial numerator.
    BCD::BCDnode* sacriCurr = sacriNumer.headptr->lessSDptr;
 
    // Assign the sign
@@ -1161,9 +1127,6 @@ const BCD operator/(BCD& numer, BCD& denom) {
       throw std::invalid_argument("+++ Divide by cucumber error +++");
    }
 
-
-
-
    // Denominator (denom) bigger than numerator (numer)
    else if (sacriDenom > numer) {
       result = 0;
@@ -1172,9 +1135,8 @@ const BCD operator/(BCD& numer, BCD& denom) {
 
    // Numerator is bigger than denominator
    else {
-
       while (sacriCurr != sacriNumer.headptr) {
-         // If numerator is not not big enough, keep grabbing numbers until it's bigger
+         // If numerator is not not big enough, keep grabbing numbers from the sacriNumer until it's bigger
          while (numerSubset < sacriDenom) {
             // Make a new node
             numerSubset.insertLSD(sacriCurr->data);
@@ -1191,32 +1153,26 @@ const BCD operator/(BCD& numer, BCD& denom) {
             }
          }
          // Numerator is guaranteed large enough
-         cout << "NumeratorSubset / Denominator : SacriNumer : " << numerSubset << " / " << sacriDenom << " : " << sacriNumer << endl;
 
          // Start mini subtractions while subtractions can be made
          while (numerSubset >= sacriDenom) {
             numerSubset = numerSubset - sacriDenom;
             counter++;
-         } // 8:0, 6:1, 4:2, 2:3, 0:4
+         }
          // numerator subset has been divided out as most it can be
          // So place the counter number in the result string
          result.insertLSD(counter);
          // Used up the counter, so reset it to zero
          counter = 0;
-
-         cout << "Result: " << result << endl;
-
-
-
       } // End while sacriCurr != headptr
-
-
    }
 
    while (result.headptr->lessSDptr->data == 0) {
       result.remove(result.headptr->lessSDptr);
    }
 
+   // Place the sign we calculated at the beginning onto the result.
    result.isPositive = tempSign;
+
    return(result);
 }
