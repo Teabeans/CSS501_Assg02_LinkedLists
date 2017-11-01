@@ -108,8 +108,13 @@
 //
 // Run with:
 // valgrind --leak-check=full <file folder path>/<file name, usually a.out>
+// OR
+// valgrind --leak-check=full --show-leak-kinds=all <file path>/a.out
+//
 // ie.
 // valgrind --leak-check=full /home/Teabean/a.out
+// OR
+// valgrind --leak-check=full --show-leak-kinds=all /home/Teabean/a.out
 //
 // ---- BEGIN STUDENT CODE ----
 
@@ -264,16 +269,24 @@ public:
    // Functions called: None
    bool remove(BCDnode* target);
 
-   // TODO: Comments
-   // #add()
+   // #add() - Adds a BCD object to another BCD object
+   // Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
+   // Preconditions: Two valid BCDs exist
+   // Postconditions: None
+   // Return value: A positive BCD representing the sum of two magnitudes
+   // Functions called: insertMSD()
    BCD const add(const BCD& term2BCD, bool isPositive) const;
 
-   // TODO: Comments
-   // #subtract()
+   // #subtract() - Subtracts a BCD object from another BCD object
+   // Parameters: difference - Working variable used to store the integer difference of two nodes. tempBorrow - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. diffBCD - BCD object used to store successive addition operations.
+   // Preconditions: The absolute value of the calling BCD must be greater or equal to the absolute value of the argument BCD.
+   // Postconditions: A BCD representing the absolute magnitude btween the two BCDs exists. This BCD will be positive.
+   // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
+   // Functions called: None
    BCD const subtract(const BCD& term2BCD, bool isPositive) const;
 
    // #isLastNode() - Declares whether the node in question is the last node in a linked list (.next or .prev leads to a node with a null value)
-   // Parameters: No internal fields
+   // Parameters: isLast - Boolean storing the results of the test
    // Preconditions: None
    // Postconditions: None
    // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
@@ -283,9 +296,9 @@ public:
    // insertMSD() - Inserts a node at the Most Significant Digit position
    // Parameters: someData - Used to populate the new node's data field.
    // Preconditions: None
-   // Postconditions: A new node is inserted as the the least significant digit position in the BCD
+   // Postconditions: A new node is inserted as the the most significant digit position in the BCD
    // Return value: None
-   // Functions called: None
+   // Functions called: BCDnode() constructor
    const void insertMSD(int someData);
 
    // insertLSD() - Inserts a node at the Least Significant Digit position
@@ -304,20 +317,28 @@ public:
    // Functions called: None
    int numDigits() const;
 
-   // toString() - To return a string representation of the BCD object.
-   // Parameters: someData - Used to populate the new node's data field.
+   // #toString() - To return a string representation of the BCD object.
+   // Parameters: returnString - Used to concatenate successive digits from the BCD.
    // Preconditions: None
-   // Postconditions: A new node is inserted as the the most significant digit position in the BCD
-   // Return value: None
-   // Functions called: None
+   // Postconditions: None
+   // Return value: A string representing the sequential digits in the BCD and a (-) sign prefix if negative.
+   // Functions called: std::to_string() - To convert an int from a node data field to a string.
    const string toString() const;
 
-   // TODO: Comments
-   //#isGreaterMagnitudeThan()
+   // #isGreaterMagnitudeThan() - Determines which term has a larger absolute value
+   // Parameters: currT1 and CurrT2 - Used for iterative comparisons.
+   // Preconditions: Two valid BCDs exist which can be compared
+   // Postconditions: None
+   // Return value: bool - True if the absolute value of T1 is greater than T2. False otherwise.
+   // Functions called: None
    bool const isGreaterMagnitudeThan(const BCD& term2);
 
-   // TODO: Comments
-   //#deepcopy()
+   // #deepcopy() - Generates a deep copy of the received target BCD.
+   // Parameters: currT1 and CurrT2 - Used for iterative comparisons.
+   // Preconditions: Two valid BCDs exist
+   // Postconditions: The calling BCD's original content has been deallocated and replaced with nodes reflecting the target BCD.
+   // Return value: None
+   // Functions called: obliterate(), insertMSD()
    void const deepcopy(const BCD& target);
 
    // #int() - Custom behavior for the BCD to int conversion operator
@@ -379,22 +400,36 @@ public:
    // If it's in the class definition, include 'friend'
    friend ostream& operator<<(ostream& coutStream, BCD& someBCD);
 
-   // + - Custom behavior for the addition operator when dealing with a BCD object (left) and a BCD object (right)
-   // Parameters: term1BCD - The original BCD object being added to ; term2BCD - The BCD number being added to the term1BCD.
-   // Preconditions: None
+   // #operator+ - Custom behavior for the addition operator when dealing with a BCD object (left) and a BCD object (right)
+   // Parameters: this - The original BCD object being added to (implied) ; term2BCD - The BCD number being added to the term1BCD.
+   // Preconditions: Two valid BCD objects exist
    // Postconditions: A new BCD object exists representing the summed addition of the old BCD and received BCD.
    // Return value: A new BCD object representing the summed addition
-   // Functions called: BCD::BCD(int) - Converts an int to a BCD object
+   // Functions called: BCD(int), add(), subtract(), isGreaterMagnitudeThan()
    const BCD operator+(BCD& term2BCD);
 
-
-   //TODO: Comments
+   // #operator- - Custom behavior for the subtraction operator when dealing with a BCD object (left) and a BCD object (right)
+   // Parameters: term1BCD - The original BCD object being subtracted from ; term2BCD - The BCD number being subtracted from term1BCD.
+   // Preconditions: None
+   // Postconditions: A new BCD object exists representing the difference of the old BCD and received BCD.
+   // Return value: A new BCD object representing the difference from subtraction
+   // Functions called: BCD(int), add(), subtract, isGreaterMagnitudeThan()
    friend BCD operator-(BCD& term1BCD, BCD& term2BCD);
 
-   //TODO: Comments
+   // #operator* - Overload of the (*) operator for multiplication of two BCD objects.
+   // Parameters: finalSum, tempProduct, nodeProduct, carry, T1curr, T2curr, ProductCurr (see below for descriptions)
+   // Preconditions: Two valid BCD objects exist.
+   // Postconditions: A new BCD exists representing the product of the two terms
+   // Return value: A BCD representing the product
+   // Functions called: numDigits(), insertLSD(), insertMSD()
    friend const BCD operator*(BCD& term1BCD, BCD& term2BCD);
 
-   //TODO: Comments
+   // #operator/ - Overload of the (/) operator for division of two BCD objects.
+   // Parameters: result, sacriNumer, sacriDenom, numerSubset, counter, tempSign, sacriCurr (see below for descriptions)
+   // Preconditions: Two valid BCD objects exist.
+   // Postconditions: A new BCD exists representing the result of the two terms' division
+   // Return value: A BCD representing the result
+   // Functions called: insertLSD(), remove()
    friend const BCD operator/(BCD& term1BCD, BCD& term2BCD);
 
 
