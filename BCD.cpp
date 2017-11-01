@@ -156,7 +156,7 @@ BCD::BCD() { // By default, the node pointer (BCDnode*) named 'head' is initiali
 BCD::BCD(int someInt) {
    // Determine if the passed int is positive or negative
    int temp = someInt;
-   if (temp < 0 && temp != INT_MIN) {
+   if (temp < 0 && temp != (-2147483647 - 1) ) {
       isPositive = false;
       // Reverse the sign of the received int so BCD formation is performed with all positive nodes
       //cout << "Achtung! This is negative!" << endl;
@@ -164,7 +164,7 @@ BCD::BCD(int someInt) {
    }
    // Special case to avoid flipping INT_MIN, then having it immediately overflow back to INT_MIN
    // See off-by-one discrepancy between INT_MIN and INT_MAX.
-   else if (temp == INT_MIN) {
+   else if (temp == (-2147483647 - 1)) {
       isPositive = false;
       temp = (temp + 1) * -1;
    }
@@ -178,7 +178,7 @@ BCD::BCD(int someInt) {
    // Make the first body node
    // cout << someInt << endl; // DEBUG
    BCDnode* body;
-   if (someInt == INT_MIN) {
+   if (someInt == (-2147483647 - 1)) {
       body = new BCDnode(((temp % 10)+1), headptr, headptr);
    }
    else {
