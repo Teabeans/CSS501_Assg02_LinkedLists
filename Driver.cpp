@@ -32,7 +32,8 @@ int main() {
    bool OperatorPlusTestII = 1; // Done - No leaks
    bool OperatorMinusTest = 1; // Done - No leaks
    bool LimitBreakerTest = 1; // Done - No leaks
-   bool OperatorMultiply = 1; // Not done
+   bool OperatorMultiply = 1; // Done - No leaks
+   bool OperatorDivide = 1;
 
 
                               // Test of the BCD default constructor
@@ -441,8 +442,8 @@ int main() {
       // BCD term2(12);
 
       // Set 4 - Confirm zero multiplication logic
-      // BCD term1(123);
-      // BCD term2(100);
+       BCD term1(123);
+       BCD term2(100);
 
       // Set 5 - Confirm trailing-zero logic II
       // BCD term1(1234);
@@ -457,11 +458,41 @@ int main() {
       // BCD term2(25);
 
       // Set 8 - Work or bust!
-       BCD term1(-1234567890); // Cannot exceed intMax, else the original assignment from an int experiences overflow.
-       BCD term2(1234567890);
+      //BCD term1(-1234567890); // Cannot exceed intMax, else the original assignment from an int experiences overflow.
+      //BCD term2(1234567890);
 
       BCD product = term1 * term2;
       cout << "Product: " << product << endl;
+   }
+
+   // Test of division operator
+   if (OperatorDivide == true) {
+      cout << endl << "Division test:" << endl;
+      BCD term1(888);
+      BCD term2(2);
+      BCD result1 = term1 / term2;
+      cout << "Result (expected 444): " << result1 << endl;
+
+      BCD term3(123456);
+      BCD term4(-123);
+      BCD result2 = term3 / term4;
+      cout << "Result (expected -1003): " << result2 << endl;
+
+      BCD term5(123456789);
+      BCD term6(4567);
+      BCD result3 = term5 / term6;
+      cout << "Result (expected 27032): " << result3 << endl;
+
+      BCD term7(2);
+      BCD term8(3);
+      BCD result4 = term7 / term8;
+      cout << "Result (expected 0): " << result4 << endl;
+
+//      BCD term9(2);
+//      BCD term10(0);
+//      BCD result5 = term9 / term10;
+//      cout << "Result (expected Divide by 0 exception): " << result5 << endl;
+
    }
 
    cout << "Final test complete!" << endl;
