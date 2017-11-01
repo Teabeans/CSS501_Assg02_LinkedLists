@@ -155,11 +155,18 @@ BCD::BCD() { // By default, the node pointer (BCDnode*) named 'head' is initiali
 // BCD::BCD(int someInt) - Constructs a new BCD with an equivalent value to the received argument int
 BCD::BCD(int someInt) {
    // Determine if the passed int is positive or negative
-   if (someInt < 0) {
+   int temp = someInt;
+   if (temp < 0 && temp != INT_MIN) {
       isPositive = false;
       // Reverse the sign of the received int so BCD formation is performed with all positive nodes
       //cout << "Achtung! This is negative!" << endl;
-      someInt = someInt * -1;
+      temp = temp * -1;
+   }
+   // Special case to avoid flipping INT_MIN, then having it immediately overflow back to INT_MIN
+   // See off-by-one discrepancy between INT_MIN and INT_MAX.
+   else if (temp == INT_MIN) {
+      isPositive = false;
+      temp = (temp + 1) * -1;
    }
    else {
       isPositive = true;
@@ -170,18 +177,23 @@ BCD::BCD(int someInt) {
    // Generates new node with value of the LSD of the int passed, headptr set to both 'next' and 'prev'
    // Make the first body node
    // cout << someInt << endl; // DEBUG
-   BCDnode* body = new BCDnode((someInt % 10), headptr, headptr);
+   BCDnode* body;
+   if (someInt == INT_MIN) {
+      body = new BCDnode(((temp % 10)+1), headptr, headptr);
+   }
+   else {
+      body = new BCDnode((temp % 10), headptr, headptr);
+   }
    headptr->lessSDptr = body;
    headptr->moreSDptr = body; // 4 of 4 pointers are set
-   someInt = someInt / 10; // Divide
+   temp = temp / 10; // Divide
    // cout << someInt << endl; // DEBUG
 
-   while (someInt > 0) { // Breaks after Most SigDigit is divided by 10
-      insertMSD(someInt % 10); // Remainder of the int when divided by 10 is always the least significant digit
-      someInt = someInt / 10; // Drop the Least SigDigit from someInt
+   while (temp != 0) { // Breaks after Most SigDigit is divided by 10
+      insertMSD(temp % 10); // Remainder of the int when divided by 10 is always the least significant digit
+      temp = temp / 10; // Drop the Least SigDigit from someInt
       // cout << someInt << endl; // DEBUG
    }
-   //cout << "BCD created. Its value is: " << this->toString() << endl << endl;
 }
 
 // #ConstructorBCD - Copy Constructor - Page 246
@@ -258,7 +270,7 @@ bool BCD::remove(BCDnode* target) {
 // ----OVERLOADS----
 
 
-// #int() - Custom behavior for the int conversion operator
+// #int() - Custom behavior for the BCD to int conversion operator
 // Parameters: 
 // Preconditions: A BCD object exists with headptr directed to a valid linked list.
 // Postconditions: An int representation of the BCD number between (2^31)-1 and (-)(2^31) has been returned OR an 'out_of_range' error has been thrown.
@@ -287,8 +299,11 @@ BCD::operator int() const {
       overflowInt = overflowInt * (-1);
    }
    // Check to see if the long long is within a valid range...
-   if (overflowInt > 2147483647 || overflowInt < (-2147483647 - 1)) {
-      throw std::out_of_range("The BCD exceeds the value of an int.");
+   if (overflowInt > 2147483647) {
+      throw std::out_of_range("The BCD exceeds the max value of an int.");
+   }
+   if ((overflowInt) < (-2147483647 - 1)) {
+      throw std::out_of_range("The BCD exceeds the min value of an int.");
    }
    // If it's within range, assign to the return variable and send it back.
    else {
@@ -307,17 +322,71 @@ bool BCD::operator<(const BCD& someBCD) const {
    // Not less than if it's equal
    if (*this == someBCD) {
       return(false);
+   } // closing if
+
+   // Compare BCD sign. If unequal and T1 is positive then false, T1 is not less than T2
+   if (isPositive != someBCD.isPositive && isPositive == true) {
+      //cout << "Mismatch! Different sign!" << endl; // DEBUG
+      return(false);
+   } // closing if
+
+   else if (isPositive != someBCD.isPositive && isPositive == false) {
+      return(true);
    }
-   else {
-      // Compare BCD sign. If unequal, these are not equal
-      if (isPositive > someBCD.isPositive) {
-         //cout << "Mismatch! Different sign!" << endl; // DEBUG
+
+   // Otherwise
+   // For positives....
+   if (isPositive == true && someBCD.isPositive == true) {
+      std::cout << "+ < +" << endl;
+      // Compare lengths
+      // If this is longer than someBCD, return false, it can't be less than
+      if (numDigits() > someBCD.numDigits()) {
+         std::cout << numDigits() << "vs" << someBCD.numDigits() << endl;
+         //cout << "Mismatch! Different list length!" << endl; // DEBUG
          return(false);
       }
-      // Otherwise, compare BCD length. If unequal, these are not equal
+      // If this is shorter than someBCD, return true, it must be less than
       else if (numDigits() < someBCD.numDigits()) {
+         std::cout << numDigits() << "vs" << someBCD.numDigits() << endl;
          //cout << "Mismatch! Different list length!" << endl; // DEBUG
          return(true);
+      }
+
+      // Both sign and length are equal, begin node by node comparison:
+      else {
+         // Queue both BCDs to their MostSD node:
+         BCDnode* currT1 = headptr->lessSDptr;
+         BCDnode* currT2 = someBCD.headptr->lessSDptr;
+
+         // While we aren't back at the head node...
+         while (currT1 != headptr) {
+            // Compare the data of the current nodes.
+            // If T1 > T2, it can't be less than, so return false
+            if (currT1->data > currT2->data) {
+               return(false);
+            }
+            // If T1 < T2....
+            if (currT1->data < currT2->data) {
+               return(true);
+            }
+            // Otherwise, advance to next node
+            currT1 = currT1->lessSDptr;
+            currT2 = currT2->lessSDptr;
+         } // Closing while
+
+      } // Closing else
+   } // Closing if
+
+   // Otherwise, for negatives.
+   else if (isPositive == false && someBCD.isPositive == false) {
+      std::cout << "- < -" << endl;
+      // If this is longer than someBCD, return true must be less than
+      if (numDigits() > someBCD.numDigits()) {
+         return(true);
+      }
+      // If this is shorter than someBCD, return false, it must be greater than
+      else if (numDigits() < someBCD.numDigits()) {
+         return(false);
       }
       // Both sign and length are equal, begin node by node comparison:
       else {
@@ -325,27 +394,23 @@ bool BCD::operator<(const BCD& someBCD) const {
          BCDnode* currT1 = headptr->lessSDptr;
          BCDnode* currT2 = someBCD.headptr->lessSDptr;
          while (currT1 != headptr) {
-            // Compare the data of the current nodes. If different, these are not equal.
+            // Compare the data of the current nodes. If T1 > T2, it must be less than, so return true
             if (currT1->data > currT2->data) {
-               //cout << "Mismatch! Different node data!" << endl; // DEBUG
-               // Positive comparison case
-               if (isPositive == true) {
-                  return(false);
-               }
-               // Negative comparison case
-               else {
-                  return(true);
-               }
+               return(true);
             }
-            // If the nodes' data is the same, advance to the next MoreSD.
-            else {
-               currT1 = currT1->moreSDptr;
-               currT2 = currT2->moreSDptr;
+            // Otherwise, T1 is less than T2.
+            if (currT2->data > currT1->data) {
+               return(false);
             }
+            // Advance to next node
+            currT1 = currT1->lessSDptr;
+            currT2 = currT2->lessSDptr;
          }
       }
    }
+
 }
+
 
 
 // #operator== - Custom behavior for the equality operator when dealing with a BCD object (left) and a BCD object (right)
@@ -864,7 +929,7 @@ const string BCD::toString() const {
    string returnString = "";
 
    if (isPositive == true) {
-      returnString += "+";
+      returnString += "";
    }
    else if (isPositive == false) {
       returnString += "-";
@@ -883,7 +948,7 @@ const string BCD::toString() const {
       // And move the current node to the next Less SigDigit
       currentNodeptr = currentNodeptr->lessSDptr;
    }
-   returnString += "";
+
    return returnString;
 }
 
@@ -919,7 +984,7 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
          if (i == 0 && j == 0) {
             // On the first round, the temp product's first node's data receives result directly.
             tempProduct.headptr->moreSDptr->data = nodeProduct; // Note, may exceed 9, carries dealt with later
-            cout << "Round 1, tempProduct: " << tempProduct << endl;
+            //cout << "Round 1, tempProduct: " << tempProduct << endl;
          }
          else {
             tempProduct.insertMSD(nodeProduct); // Note, may exceed 9, carries dealt with later
@@ -927,7 +992,7 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
          // Advance term1 target
          T1curr = T1curr->moreSDptr;
          // Repeat node product calculation
-         cout << "End of J loop, tempProduct: " << tempProduct << endl;
+         //cout << "End of J loop, tempProduct: " << tempProduct << endl;
       }
 
 
@@ -956,7 +1021,7 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
          // And one additional node hop to get T1curr past the head and back onto its LeastSigDigit.
          T1curr = term1BCD.headptr->moreSDptr;
       }
-      cout << "Temp product, carried: " << tempProduct << endl;
+      //cout << "Temp product, carried: " << tempProduct << endl;
       // tempProduct now represents all multiplications with carries
 
       // Apply trailing zeros
@@ -965,8 +1030,8 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
       }
 
       //add subproduct to finalSum
-      cout << endl << "Adding..." << endl;
-      cout << "FinalSum before addition: " << finalSum.toString() << endl;
+      //cout << endl << "Adding..." << endl;
+      //cout << "FinalSum before addition: " << finalSum.toString() << endl;
 
 
 
@@ -974,18 +1039,18 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
 
 
 
-      cout << "tempProd before addition: " << tempProduct << endl;
+      //cout << "tempProd before addition: " << tempProduct << endl;
       finalSum = finalSum.add(tempProduct, true);
       tempProduct = 0;
-      cout << "tempProduct reset to zero. tempProduct: " << tempProduct << endl;
-      cout << "FinalSum after addition: " << finalSum << endl << endl;
+      //cout << "tempProduct reset to zero. tempProduct: " << tempProduct << endl;
+      //cout << "FinalSum after addition: " << finalSum << endl << endl;
 
       // Advance term 2
       T2curr = T2curr->moreSDptr;
 
    } // Repeat for next digit of term2
 
-   cout << "Final sum: " << finalSum << endl << endl;
+   //cout << "Final sum: " << finalSum << endl << endl;
    // Assign sign
    if (term1BCD.isPositive != term2BCD.isPositive) {
       finalSum.isPositive = false;
