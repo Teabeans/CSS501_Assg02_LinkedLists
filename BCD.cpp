@@ -542,46 +542,6 @@ BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
 }
 
 // TODO: Comments
-const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
-   BCD product;
-   BCD tempProduct;
-   int nodeProduct;
-   BCD::BCDnode* T1curr = term1BCD.headptr->moreSDptr;
-   BCD::BCDnode* T2curr = term2BCD.headptr->moreSDptr;
-   // T1:
-   // 1-2-3
-   //     ^
-   // T2:
-   //   1-2
-   //     ^
-
-
-   // T2 :   1-2
-   //          ^
-   // For every digit in Term2...
-   for (int i = 0; i < term2BCD.numDigits(); i++) {
-      // T2 : 1-2-3
-      //          ^
-      // Against every digit in Term1...
-      for (int j = 0; j < term1BCD.numDigits(); j++) {
-         // Multiply the digit from Term2 against the digit from Term1
-         nodeProduct = T1curr->data * T2curr->data;
-         // For every loop in i-1, apply trailing zero
-         // Place node product at the MostSD
-         // Repeat node product calculation
-      }
-   }
-
-   cout << product;
-   return(product);
-}
-
-
-
-
-
-
-// TODO: Comments
 const BCD operator/(BCD& term1BCD, BCD& term2BCD) {
    BCD product;
    return(product);
@@ -735,6 +695,10 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
    //   cout << "Address of loaded sumBCD: " << &sumBCD << endl;
    //   cout << "Returning sumBCD and add() destructors being called." << endl;
    // Send the sumBCD, now complete, back to whatever called this function
+
+
+
+
    return sumBCD; // TODO: Probably right here; we're returning a BCD that gets destructed in short order
                   // Although... isn't that the point? Generate a sum and then return it so it can be assigned to something else?
 }
@@ -848,7 +812,7 @@ const void BCD::insertMSD(int someData) {
    BCDnode* oldMSD = headptr->lessSDptr;
    // Make a new node off in space. Its data is the argument passed. Its MSD pointer points to head, its LSD pointer points to the old MSD.
    BCDnode* insertedNodeptr = new BCDnode(someData, headptr, oldMSD); // data, greater, lesser
-                                                                      // Redirects the old MSD's next pointer to the inserted node
+   // Redirects the old MSD's next pointer to the inserted node
    oldMSD->moreSDptr = insertedNodeptr;
    // Redirect the head's lessSDptr to the current node.
    headptr->lessSDptr = insertedNodeptr;
@@ -864,11 +828,11 @@ const void BCD::insertMSD(int someData) {
 const void BCD::insertLSD(int someData) {
    BCDnode* oldLSD = headptr->moreSDptr;
    // Make a new node off in space. Its data is the argument passed. Its LSD pointer points to head, its MSD pointer points to the old LSD.
-   BCDnode* insertedNodeptr = new BCDnode(someData, headptr->moreSDptr, headptr); // data, greater, lesser
-                                                                                  // Redirects the old LSD's next pointer to the inserted node
+   BCDnode* insertedNodeptr = new BCDnode(someData, oldLSD, headptr); // data, greater, lesser
+   // Redirects the old LSD's next pointer to the inserted node
    oldLSD->lessSDptr = insertedNodeptr;
    // Redirect the head's moreSDptr to the current node.
-   oldLSD = insertedNodeptr;
+   headptr->moreSDptr = insertedNodeptr;
    // New node created with int data and 4 of 4 pointers are pointed at the correct place
 }
 
@@ -921,4 +885,110 @@ const string BCD::toString() const {
    }
    returnString += "";
    return returnString;
+}
+
+
+// TODO: Comments
+// #operator*
+const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
+   BCD finalSum; // Sum of all temp products
+   BCD tempProduct; // Product of one line of multiplication
+   int nodeProduct; // Product of a single multiplication event
+   int carry = 0;
+   BCD::BCDnode* T1curr = term1BCD.headptr->moreSDptr;
+   BCD::BCDnode* T2curr = term2BCD.headptr->moreSDptr;
+   BCD::BCDnode* ProductCurr;
+
+   if (0 == term1BCD || 0 == term2BCD) {
+      finalSum = 0;
+      return (finalSum);
+   }
+   // Otherwise...
+   // For every digit in Term2...
+   for (int i = 0; i < term2BCD.numDigits(); i++) {
+
+
+      // Build the sub-product
+      // Against every digit in Term1...
+      for (int j = 0; j < term1BCD.numDigits(); j++) {
+         // Multiply the digits together
+         nodeProduct = T1curr->data * T2curr->data;
+         cout << i << ":" << j << ":" << T1curr->data << ":" << T2curr->data << ":" << nodeProduct << endl;
+         // Place node product at the MostSD
+         // Special case for the first round (since first node is already 0)
+         if (i == 0 && j == 0) {
+            // On the first round, the temp product's first node's data receives result directly.
+            tempProduct.headptr->moreSDptr->data = nodeProduct; // Note, may exceed 9, carries dealt with later
+            cout << "Round 1, tempProduct: " << tempProduct << endl;
+         }
+         else {
+            tempProduct.insertMSD(nodeProduct); // Note, may exceed 9, carries dealt with later
+         }
+         // Advance term1 target
+         T1curr = T1curr->moreSDptr;
+         // Repeat node product calculation
+         cout << "End of J loop, tempProduct: " << tempProduct << endl;
+      }
+
+
+
+      // Handle subproduct carries
+      // Pointing at LSD of Temp Product
+      ProductCurr = tempProduct.headptr->moreSDptr;
+      
+      // While we aren't back at the head...
+      while (ProductCurr != tempProduct.headptr) {
+         // Add the carry (even if 0)
+         ProductCurr->data = ProductCurr->data + carry;
+         carry = 0;
+         if (ProductCurr->data > 9) {
+            // Extract how many tens there are...
+            carry = ProductCurr->data / 10;
+            // And set the node value to remainder of mod 10 division.
+            ProductCurr->data = ProductCurr->data % 10; 
+         }
+         // If we're on the last node, but the carry will take us one more, add a node
+         if (ProductCurr->moreSDptr == tempProduct.headptr && carry > 0) {
+            tempProduct.insertMSD(0);
+         }
+         // Advance!
+         ProductCurr = ProductCurr->moreSDptr;
+         // And one additional node hop to get T1curr past the head and back onto its LeastSigDigit.
+         T1curr = term1BCD.headptr->moreSDptr;
+      }
+      cout << "Temp product, carried: " << tempProduct << endl;
+      // tempProduct now represents all multiplications with carries
+
+      // Apply trailing zeros
+      for (int k = 1; k < i; k++) { // Nothing happens on first digit of T2.
+         tempProduct.insertLSD(0);
+      }
+
+      //add subproduct to finalSum
+      cout << endl << "Adding..." << endl;
+      cout << "FinalSum before addition: " << finalSum.toString() << endl;
+
+
+
+
+
+
+
+      cout << "tempProd before addition: " << tempProduct << endl;
+      finalSum = finalSum.add(tempProduct, true);
+      tempProduct = 0;
+      cout << "tempProduct reset to zero. tempProduct: " << tempProduct << endl;
+      cout << "FinalSum after addition: " << finalSum << endl << endl;
+
+      // Advance term 2
+      T2curr = T2curr->moreSDptr;
+
+   } // Repeat for next digit of term2
+
+   cout << "Final sum: " << finalSum << endl << endl;
+   // Assign sign
+   if (term1BCD.isPositive != term2BCD.isPositive) {
+      finalSum.isPositive = false;
+   }
+   return(finalSum);
 }
