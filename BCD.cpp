@@ -104,7 +104,6 @@
 
 // ---- IMPORT STATEMENTS ----
 
-#pragma once
 
 // Includes exceptions
 #include <stdexcept>
@@ -125,12 +124,13 @@ using namespace std;
 
 struct BCDnode {
    // Fields: Node fields
-   string nodeName = "";
+/*   string nodeName = "";
    int data = 0;
    int borrow = 0;
    int carry = 0;
    BCDnode* moreSDptr; // Node pointer to the next more significant digit (next)
    BCDnode* lessSDptr; // Node pointer to the next least significant digit (prev)
+*/
 }; // Closing 'struct Node'
 
    // Note: Fields can be initialized in EITHER the .h or the .cpp
@@ -213,16 +213,47 @@ BCD::BCD(const BCD& someBCD) {
 // #~BCD() - Destructor - Page 245-246
 // Deletes all nodes in a list (appears to work as of 10.27
 BCD::~BCD() {
-//   cout << "~BCD Destructor. Address of targetted headptr is:" << endl << &headptr << endl;
-//   obliterate(headptr); // Turning off temporarily
-//    TODO: Verify that destructor works
-   if (true) {
-      obliterate();
-   }
-//   cout << "~BCD Destructor complete. Linked list destroyed." << endl << endl;
+   //   cout << "~BCD Destructor. Address of targetted headptr is:" << endl << &headptr << endl;
+   //   obliterate(headptr); // Turning off temporarily
+   //    TODO: Verify that destructor works
+   obliterate();
+   headptr->moreSDptr = nullptr;
+   headptr->lessSDptr = nullptr;
+   delete headptr;
+   //   cout << "~BCD Destructor complete. Linked list destroyed." << endl << endl;
 }
 
+// TODO: Comments
+void BCD::obliterate() {
+   //   cout << "Start obliterate(): " << endl;
+   BCDnode* target = this->headptr->lessSDptr;
+   while (target != headptr) {
+      remove(target);
+      target = this->headptr->lessSDptr;
+   }
+}
 
+// TODO: Comments
+bool BCD::remove(BCDnode* target) {
+   BCDnode* prev = target->moreSDptr;
+   BCDnode* next = target->lessSDptr;
+   //   cout << "Redirecting pointers around target" << endl; // DEBUG
+   prev->lessSDptr = next;
+   next->moreSDptr = prev;
+
+   //   cout << "Clearing internal fields (for security)..." << endl; // DEBUG - Omitted for simplicity (get working before optimizing)
+   //   target->nodeName.clear();
+   //   target->data = NULL;
+   //   target->borrow = NULL;
+   //   target->carry = NULL;
+   target->moreSDptr = nullptr;
+   target->lessSDptr = nullptr;
+
+   //   cout << "Remove()ing target node" << endl;// DEBUG
+   // Deallocate memory of target node.
+   delete target; // Confirmed, pg. 280
+   return(true);
+}
 
 // ----OVERLOADS----
 
@@ -390,7 +421,7 @@ BCD& BCD::operator=(const BCD& rightHandSide) {
 // Return value: None
 // Functions called: None
 istream& operator>> (istream& cinData, BCD& someBCD) { // where 'cinData' is the input variable and 'someBCD' is the BCD object
-   // Capture the int value from cin
+                                                       // Capture the int value from cin
    int numberBank;
    cin >> numberBank;
    // Assign the int to someBCD
@@ -422,37 +453,37 @@ ostream& operator<< (ostream& coutStream, BCD& someBCD) { // where 'cinData' is 
 // Functions called: BCD::BCD(int) - Converts an int to a BCD object
 //const MyClass MyClass::operator+(const MyClass &other) const
 // TODO: Test
-const BCD operator+(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
-// Term1BCD exists
-// Term2BCD exists
+const BCD BCD::operator+(BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
+                                                    // Term1BCD exists
+                                                    // Term2BCD exists
 
-   //cout << "Starting operator+: " << term1BCD.toString() << term2BCD.toString() << endl;
-   if (term1BCD.isPositive == true && term2BCD.isPositive == true) {
+                                                    //cout << "Starting operator+: " << term1BCD.toString() << term2BCD.toString() << endl;
+   if (this->isPositive == true && term2BCD.isPositive == true) {
       //cout << "Positive + Positive: so add()" << endl;
-      return(term1BCD.add(term2BCD, true)); // Result must be positive
+      return(this->add(term2BCD, true)); // Result must be positive
    }
-   else if (term1BCD.isPositive == false && term2BCD.isPositive == false) {
-//cout << "Negative + Negative: so add()" << endl;
-return(term1BCD.add(term2BCD, false)); // Result must be negative
+   else if (this->isPositive == false && term2BCD.isPositive == false) {
+      //cout << "Negative + Negative: so add()" << endl;
+      return(this->add(term2BCD, false)); // Result must be negative
    }
    else {
       // BIG + small => Delta is |T1| - |T2|
-      if (term1BCD.isGreaterMagnitudeThan(term2BCD)) {
-         if (term1BCD.isPositive == true) {
-            return(term1BCD.subtract(term2BCD, true)); // Result will be positive
+      if (this->isGreaterMagnitudeThan(term2BCD)) {
+         if (this->isPositive == true) {
+            return(this->subtract(term2BCD, true)); // Result will be positive
          }
          else {
-            return(term1BCD.subtract(term2BCD, false)); // Result will be negative
+            return(this->subtract(term2BCD, false)); // Result will be negative
          }
       }
 
       // small + BIG => Delta is |T2| - |T1|
-      else if (term2BCD.isGreaterMagnitudeThan(term1BCD)) {
-         if (term1BCD.isPositive == true) {
-            return(term2BCD.subtract(term1BCD, false)); // Result will be negative
+      else if (term2BCD.isGreaterMagnitudeThan(*this)) {
+         if (this->isPositive == true) {
+            return(term2BCD.subtract(*this, false)); // Result will be negative
          }
          else {
-            return(term2BCD.subtract(term1BCD, true)); // Result will be positive
+            return(term2BCD.subtract(*this, true)); // Result will be positive
          }
       }
       // They're the same magnitude, but one is positive and one is negative
@@ -470,7 +501,7 @@ return(term1BCD.add(term2BCD, false)); // Result must be negative
 // Functions called: BCD::BCD(int) - Converts an int to a BCD object
 BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input variable and 'thisBCD' is the original BCD object
 
-   //cout << "Starting operator-()" << term1BCD.toString() << term2BCD.toString() << endl;
+                                              //cout << "Starting operator-()" << term1BCD.toString() << term2BCD.toString() << endl;
    if (term1BCD.isPositive == true && term2BCD.isPositive == false) {
       //cout << "Positive - Negative: so add()" << endl;
       return(term1BCD.add(term2BCD, true)); // Result must be positive
@@ -525,8 +556,8 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
    //     ^
 
 
-      // T2 :   1-2
-      //          ^
+   // T2 :   1-2
+   //          ^
    // For every digit in Term2...
    for (int i = 0; i < term2BCD.numDigits(); i++) {
       // T2 : 1-2-3
@@ -538,9 +569,9 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
          // For every loop in i-1, apply trailing zero
          // Place node product at the MostSD
          // Repeat node product calculation
-         }
       }
    }
+
    cout << product;
    return(product);
 }
@@ -593,13 +624,14 @@ bool const BCD::isGreaterMagnitudeThan(const BCD& term2) {
 // Precondition:
 void const BCD::deepcopy(const BCD& target) {
    //cout << "Starting deepcopy()" << endl; // DEBUG
-                                          // Test if 'this' and 'target' are the same thing
+   // Test if 'this' and 'target' are the same thing
    if (headptr == target.headptr) {
       //cout << "Same target as this, so do nothing" << endl; // DEBUG
    }
    else {
       // Delete all nodes associated with the headpointer (clean slate)
       obliterate();
+      delete headptr;
       // Create a new node - copied from internal values of target.headptr - give its address to headptr.
       headptr = new BCDnode();
       // Set current node to the target LeastSD
@@ -607,14 +639,14 @@ void const BCD::deepcopy(const BCD& target) {
       // Generate a new body node, also copied from the current target
       //cout << "deepcopy() curr->data: " << curr->data << endl;
       BCDnode* newBody = new BCDnode(curr->data, headptr, headptr); // 2/4 pointers set
-      // Connect remaining pointers
+                                                                    // Connect remaining pointers
       headptr->lessSDptr = newBody;
       headptr->moreSDptr = newBody; // 4/4 pointers are set
-      //cout << "Copying nodes... " << endl; // DEBUG
-      // Advance (possibly back to the head)
+                                    //cout << "Copying nodes... " << endl; // DEBUG
+                                    // Advance (possibly back to the head)
       curr = curr->moreSDptr;
       while (curr != target.headptr) { // While we aren't back at the head...
-         //cout << "deepcopy() while loop curr->data: " << curr->data << endl;
+                                       //cout << "deepcopy() while loop curr->data: " << curr->data << endl;
          insertMSD(curr->data); // Insert a new node at the MostSD using the current data field
          curr = curr->moreSDptr; // Advance
       }
@@ -622,24 +654,7 @@ void const BCD::deepcopy(const BCD& target) {
    }
 }
 
-// #obliterate() - Deletes all nodes linked to the specified headnode and deallocates memory
-// Parameters: sum - Working variable used to store the integer sum of two nodes. addCarry - Working variable used to store the tens place result of two integers summed. terminate - Terminate flag for a while loop. sumBCD - BCD object used to store successive addition operations.
-// Preconditions: None
-// Postconditions: None
-// Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
-// Functions called: None
-// Breaks if an empty list is sent
-void BCD::obliterate() {
-//   cout << "Start obliterate(): " << endl;
-   while (this->isLastNode(headptr)) {
-      remove(headptr->lessSDptr);
-   }
-   // TODO: Delete headnode?
-      /* cout << "Body nodes deleted" << endl; // DEBUG
-      cout << "Targeting head in obliterate() at address: " << headptr << endl; // DEBUG
-      remove(headptr);
-      cout << "obliterate() destructors being called... " << endl;*/
-}
+
 
 
 
@@ -650,7 +665,7 @@ void BCD::obliterate() {
 // Return value: boolean, representing whether this is the "last" card in a stack (true) or not (false).
 // Functions called: None
 BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to fully qualify method location before 'this' becomes available for use
-   //cout << "Starting add()" << endl;
+                                                                 //cout << "Starting add()" << endl;
 
    int sum = 0;
    int addCarry = 0;
@@ -662,12 +677,12 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
    BCDnode* T1curr = this->headptr->moreSDptr;    // Set T1 current node to term1's first node
    BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
    BCDnode* sumcurr = sumBCD.headptr->moreSDptr;  // Set the sum current node to sumBCD's first node
-   // cout << "T1curr: " << T1curr->data << endl; // DEBUG
-   // cout << "T2curr: " << T2curr->data << endl; // DEBUG
-   //cout << "add(), Sumcurr: " << sumcurr->data << endl; // DEBUG
-   //cout << "add(), Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
+                                                  // cout << "T1curr: " << T1curr->data << endl; // DEBUG
+                                                  // cout << "T2curr: " << T2curr->data << endl; // DEBUG
+                                                  //cout << "add(), Sumcurr: " << sumcurr->data << endl; // DEBUG
+                                                  //cout << "add(), Sumcurr.carry: " << sumcurr->carry << endl; // DEBUG
 
-   // While both BCDs are not resting at the head node...
+                                                  // While both BCDs are not resting at the head node...
    while (terminate == false) {
       // Sum the two terms...
       sum = (T1curr->data) + (T2curr->data) + sumcurr->carry;
@@ -717,8 +732,8 @@ BCD const BCD::add(const BCD& term2BCD, bool isPositive) const { // Need to full
    } // Closing while loop
    sumBCD.isPositive = isPositive;
    //cout << "sum of T1 and T2: " << sumBCD.toString() << endl; // DEBUG
-//   cout << "Address of loaded sumBCD: " << &sumBCD << endl;
-//   cout << "Returning sumBCD and add() destructors being called." << endl;
+   //   cout << "Address of loaded sumBCD: " << &sumBCD << endl;
+   //   cout << "Returning sumBCD and add() destructors being called." << endl;
    // Send the sumBCD, now complete, back to whatever called this function
    return sumBCD; // TODO: Probably right here; we're returning a BCD that gets destructed in short order
                   // Although... isn't that the point? Generate a sum and then return it so it can be assigned to something else?
@@ -744,7 +759,7 @@ BCD const BCD::subtract(const BCD& term2BCD, bool isPositive) const {
    BCDnode* T2curr = term2BCD.headptr->moreSDptr; // Set T2 current node to term2's first node
    BCDnode* diffcurr = diffBCD.headptr->moreSDptr; // Set the sum current node to sumBCD's first node
 
-   // While both BCDs are not resting at the head node...
+                                                   // While both BCDs are not resting at the head node...
    while (terminate == false) {
       // Subtract the two terms...
       difference = (T1curr->data) - (T2curr->data) - diffcurr->borrow;
@@ -833,7 +848,7 @@ const void BCD::insertMSD(int someData) {
    BCDnode* oldMSD = headptr->lessSDptr;
    // Make a new node off in space. Its data is the argument passed. Its MSD pointer points to head, its LSD pointer points to the old MSD.
    BCDnode* insertedNodeptr = new BCDnode(someData, headptr, oldMSD); // data, greater, lesser
-   // Redirects the old MSD's next pointer to the inserted node
+                                                                      // Redirects the old MSD's next pointer to the inserted node
    oldMSD->moreSDptr = insertedNodeptr;
    // Redirect the head's lessSDptr to the current node.
    headptr->lessSDptr = insertedNodeptr;
@@ -850,7 +865,7 @@ const void BCD::insertLSD(int someData) {
    BCDnode* oldLSD = headptr->moreSDptr;
    // Make a new node off in space. Its data is the argument passed. Its LSD pointer points to head, its MSD pointer points to the old LSD.
    BCDnode* insertedNodeptr = new BCDnode(someData, headptr->moreSDptr, headptr); // data, greater, lesser
-   // Redirects the old LSD's next pointer to the inserted node
+                                                                                  // Redirects the old LSD's next pointer to the inserted node
    oldLSD->lessSDptr = insertedNodeptr;
    // Redirect the head's moreSDptr to the current node.
    oldLSD = insertedNodeptr;
@@ -873,38 +888,7 @@ int BCD::numDigits() const {
    return(counter);
 }
 
-// #remove() - Deletes a specified node, deallocates memory, and redirects relevant pointers
-// Parameters:
-// Preconditions:
-// Postconditions:
-// Return value: boolean, representing whether this method completed successfully.
-// Functions called: None
-bool BCD::remove(BCDnode* target) {
-   if (target == nullptr) {
-      //cout << "ACHTUNG! remove() has been passed a nullptr. Breaking.";
-      return(false);
-   }
-   //   cout << "Start remove(). Address of remove() target: " << &target << endl; // DEBUG
-   BCDnode targetNode = *target;
-   //cout << targetNode.data;
 
-   //   cout << "Redirecting pointers around target" << endl; // DEBUG
-   target->moreSDptr->lessSDptr = target->lessSDptr;
-   target->lessSDptr->moreSDptr = target->moreSDptr;
-
-   //   cout << "Clearing internal fields (for security)..." << endl; // DEBUG - Omitted for simplicity (get working before optimizing)
-   //   target->nodeName.clear();
-   //   target->data = NULL;
-   //   target->borrow = NULL;
-   //   target->carry = NULL;
-   //   target->moreSDptr = nullptr;
-   //   target->lessSDptr = nullptr;
-
-   //   cout << "Remove()ing target node" << endl;// DEBUG
-   // Deallocate memory of target node.
-   delete(target); // Confirmed, pg. 280
-   return(true);
-}
 
 // #toString() - To return a string representation of the decoded PunchCard.
 // Parameters: returnString - Used to concatenate successive characters from the outputArray.
