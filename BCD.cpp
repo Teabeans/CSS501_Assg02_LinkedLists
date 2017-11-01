@@ -606,11 +606,7 @@ BCD operator-(BCD& term1BCD, BCD& term2BCD) { // where 'someInt' is the input va
    }
 }
 
-// TODO: Comments
-const BCD operator/(BCD& term1BCD, BCD& term2BCD) {
-   BCD product;
-   return(product);
-}
+
 
 // #isGreaterMagnitudeThan()
 bool const BCD::isGreaterMagnitudeThan(const BCD& term2) {
@@ -974,79 +970,73 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
 
 
       // Build the sub-product
-      // Against every digit in Term1...
-      for (int j = 0; j < term1BCD.numDigits(); j++) {
-         // Multiply the digits together
-         nodeProduct = T1curr->data * T2curr->data;
-         cout << i << ":" << j << ":" << T1curr->data << ":" << T2curr->data << ":" << nodeProduct << endl;
-         // Place node product at the MostSD
-         // Special case for the first round (since first node is already 0)
-         if (i == 0 && j == 0) {
-            // On the first round, the temp product's first node's data receives result directly.
-            tempProduct.headptr->moreSDptr->data = nodeProduct; // Note, may exceed 9, carries dealt with later
-            //cout << "Round 1, tempProduct: " << tempProduct << endl;
-         }
-         else {
-            tempProduct.insertMSD(nodeProduct); // Note, may exceed 9, carries dealt with later
-         }
-         // Advance term1 target
-         T1curr = T1curr->moreSDptr;
-         // Repeat node product calculation
-         //cout << "End of J loop, tempProduct: " << tempProduct << endl;
-      }
+// Against every digit in Term1...
+for (int j = 0; j < term1BCD.numDigits(); j++) {
+   // Multiply the digits together
+   nodeProduct = T1curr->data * T2curr->data;
+   cout << i << ":" << j << ":" << T1curr->data << ":" << T2curr->data << ":" << nodeProduct << endl;
+   // Place node product at the MostSD
+   // Special case for the first round (since first node is already 0)
+   if (i == 0 && j == 0) {
+      // On the first round, the temp product's first node's data receives result directly.
+      tempProduct.headptr->moreSDptr->data = nodeProduct; // Note, may exceed 9, carries dealt with later
+      //cout << "Round 1, tempProduct: " << tempProduct << endl;
+   }
+   else {
+      tempProduct.insertMSD(nodeProduct); // Note, may exceed 9, carries dealt with later
+   }
+   // Advance term1 target
+   T1curr = T1curr->moreSDptr;
+   // Repeat node product calculation
+   //cout << "End of J loop, tempProduct: " << tempProduct << endl;
+}
 
 
 
-      // Handle subproduct carries
-      // Pointing at LSD of Temp Product
-      ProductCurr = tempProduct.headptr->moreSDptr;
-      
-      // While we aren't back at the head...
-      while (ProductCurr != tempProduct.headptr) {
-         // Add the carry (even if 0)
-         ProductCurr->data = ProductCurr->data + carry;
-         carry = 0;
-         if (ProductCurr->data > 9) {
-            // Extract how many tens there are...
-            carry = ProductCurr->data / 10;
-            // And set the node value to remainder of mod 10 division.
-            ProductCurr->data = ProductCurr->data % 10; 
-         }
-         // If we're on the last node, but the carry will take us one more, add a node
-         if (ProductCurr->moreSDptr == tempProduct.headptr && carry > 0) {
-            tempProduct.insertMSD(0);
-         }
-         // Advance!
-         ProductCurr = ProductCurr->moreSDptr;
-         // And one additional node hop to get T1curr past the head and back onto its LeastSigDigit.
-         T1curr = term1BCD.headptr->moreSDptr;
-      }
-      //cout << "Temp product, carried: " << tempProduct << endl;
-      // tempProduct now represents all multiplications with carries
+// Handle subproduct carries
+// Pointing at LSD of Temp Product
+ProductCurr = tempProduct.headptr->moreSDptr;
 
-      // Apply trailing zeros
-      for (int k = 1; k < i; k++) { // Nothing happens on first digit of T2.
-         tempProduct.insertLSD(0);
-      }
+// While we aren't back at the head...
+while (ProductCurr != tempProduct.headptr) {
+   // Add the carry (even if 0)
+   ProductCurr->data = ProductCurr->data + carry;
+   carry = 0;
+   if (ProductCurr->data > 9) {
+      // Extract how many tens there are...
+      carry = ProductCurr->data / 10;
+      // And set the node value to remainder of mod 10 division.
+      ProductCurr->data = ProductCurr->data % 10;
+   }
+   // If we're on the last node, but the carry will take us one more, add a node
+   if (ProductCurr->moreSDptr == tempProduct.headptr && carry > 0) {
+      tempProduct.insertMSD(0);
+   }
+   // Advance!
+   ProductCurr = ProductCurr->moreSDptr;
+   // And one additional node hop to get T1curr past the head and back onto its LeastSigDigit.
+   T1curr = term1BCD.headptr->moreSDptr;
+}
+//cout << "Temp product, carried: " << tempProduct << endl;
+// tempProduct now represents all multiplications with carries
 
-      //add subproduct to finalSum
-      //cout << endl << "Adding..." << endl;
-      //cout << "FinalSum before addition: " << finalSum.toString() << endl;
+// Apply trailing zeros
+for (int k = 1; k < i; k++) { // Nothing happens on first digit of T2.
+   tempProduct.insertLSD(0);
+}
 
+//add subproduct to finalSum
+//cout << endl << "Adding..." << endl;
+//cout << "FinalSum before addition: " << finalSum.toString() << endl;
 
+//cout << "tempProd before addition: " << tempProduct << endl;
+finalSum = finalSum.add(tempProduct, true);
+tempProduct = 0;
+//cout << "tempProduct reset to zero. tempProduct: " << tempProduct << endl;
+//cout << "FinalSum after addition: " << finalSum << endl << endl;
 
-
-
-
-
-      //cout << "tempProd before addition: " << tempProduct << endl;
-      finalSum = finalSum.add(tempProduct, true);
-      tempProduct = 0;
-      //cout << "tempProduct reset to zero. tempProduct: " << tempProduct << endl;
-      //cout << "FinalSum after addition: " << finalSum << endl << endl;
-
-      // Advance term 2
-      T2curr = T2curr->moreSDptr;
+// Advance term 2
+T2curr = T2curr->moreSDptr;
 
    } // Repeat for next digit of term2
 
@@ -1056,4 +1046,76 @@ const BCD operator*(BCD& term1BCD, BCD& term2BCD) {
       finalSum.isPositive = false;
    }
    return(finalSum);
+}
+
+
+
+// TODO: Comments
+const BCD operator/(BCD& numer, BCD& denom) {
+   BCD result;
+   BCD sacriNumer = numer;
+   BCD numerSubset = 0;
+   int counter;
+   BCD::BCDnode* sacriCurr = sacriNumer.headptr->lessSDptr;
+
+   // Divide by zero case
+   if (0 == denom) {
+      // Implode
+      throw std::invalid_argument("+++ Divide by cucumber error +++");
+   }
+
+   // Denominator (denom) bigger than numerator (numer)
+   else if (denom > numer) {
+      result = 0;
+   }
+
+   // Numerator is bigger than denominator
+   else {
+      // Special behavior if the subset is 0 (to avoid leading zeroes, the numbers must be drawn, then trimmed)
+      if (0 == numerSubset) {
+         for (int i = 0; i < denom.numDigits(); i++) {
+            // Make a new node
+            numerSubset.insertLSD(sacriCurr->data);
+            // Advance sacrificial current pointer
+            sacriCurr = sacriCurr->lessSDptr;
+            // And delete the last number we were at (it can no longer be used)
+            sacriNumer.remove(sacriCurr->moreSDptr);
+         }
+         // Trim leading zeroes. While the MostSigDigit is a zero...
+         while (numerSubset.headptr->lessSDptr->data == 0) {
+            // Remove the MostSigDigit
+            numerSubset.remove(numerSubset.headptr->lessSDptr);
+         }
+      }
+      // Matching length temp numerator made
+
+      // If numerator is not not big enough, keep grabbing numbers until it's bigger
+      while (numerSubset < denom) {
+         // Make a new node
+         numerSubset.insertLSD(sacriCurr->data);
+         // Advance sacrificial current pointer
+         sacriCurr = sacriCurr->lessSDptr;
+         // And delete the last number we were at (it can no longer be used)
+         sacriNumer.remove(sacriCurr->moreSDptr);
+      }
+      // Numerator is guaranteed large enough
+      cout << "NumeratorSubset / Denominator : SacriNumer : " << numerSubset << " / " << denom << " : " << sacriNumer << endl;
+
+      // Start mini subtractions
+      while (numerSubset > 0) {
+
+      }
+
+
+
+
+
+
+
+   }
+
+
+
+
+   return(result);
 }
