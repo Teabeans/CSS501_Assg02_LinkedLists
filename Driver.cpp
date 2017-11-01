@@ -5,38 +5,38 @@ using namespace std;
 
 int main() {
    // Control variables
-   bool BCDConstructorDefaultTest = 1; // Done
-   bool BCDtoStringTest = 1; // Done
-   bool BCDOperatorIntTest = 1; // Done
-   bool EqualityOperatorTest = 1; // Done
-   bool BCDConstructorByIntTest = 1; // Done
-   bool BCDnumDigitsTest = 1; // Done
-   bool BCDRemoveTest = 1; // Done
-   bool BCDObliterateTest = 1; // Done
-   bool BCDConstructorBCDTest = 1; // Done
-   bool BCDAssignmentOperatorTest = 1; // Done
-   bool LessThanOperatorTest = 1; // Done
+   bool BCDConstructorDefaultTest = 1; // Done - No leaks
+   bool BCDtoStringTest = 1; // Done - No leaks
+   bool BCDOperatorIntTest = 1; // Done - No leaks
+   bool EqualityOperatorTest = 1; // Done - No leaks
+   bool BCDConstructorByIntTest = 1; // Done - No leaks
+   bool BCDnumDigitsTest = 1; // Done - No leaks
+   bool BCDRemoveTest = 1; // Done - No leaks
+   bool BCDObliterateTest = 1; // Done - No leaks
+   bool BCDConstructorBCDTest = 1; // Done - No leaks
+   bool BCDAssignmentOperatorTest = 0; // Done
+   bool LessThanOperatorTest = 0; // Done
 
-   bool DestructorTest = 1; // Not done - Test in Valgrind
+   bool DestructorTest = 0; // Not done - Test in Valgrind
 
-   bool BCDIntAssignmentTest = 1; // Done
-   bool MagnitudeTest = 1; // Done
-   bool OperatorPlusTest = 1; // Done
-   bool PlusAndAssignTest = 1; // Done
-   bool cinDebugTest = 1; // Done - Confirm that the program can pull content in from cin.
-   // In Visual Studio 2017, go to Debug > Project Properties... > Configuration Properties > Debugging > Command Arguments > Edit...
-   // Enter '< someTextFileName.txt' (sans single quotes)
-   // The above text file should be located in your project directory adjacent your source files, containing valid data entries
-   // In this case, whitespace delimited integers.
-   // The text file may be located elsewhere, but the command argument file path will need to be adjusted accordingly.
-   bool cinBCDTest = 1; // Done
-   bool OperatorPlusTestII = 1; // Done
-   bool OperatorMinusTest = 1; // Done
-   bool LimitBreakerTest = 1; // Done
-   bool OperatorMultiply = 1; // Not done
+   bool BCDIntAssignmentTest = 0; // Done
+   bool MagnitudeTest = 0; // Done
+   bool OperatorPlusTest = 0; // Done
+   bool PlusAndAssignTest = 0; // Done
+   bool cinDebugTest = 0; // Done - Confirm that the program can pull content in from cin.
+                          // In Visual Studio 2017, go to Debug > Project Properties... > Configuration Properties > Debugging > Command Arguments > Edit...
+                          // Enter '< someTextFileName.txt' (sans single quotes)
+                          // The above text file should be located in your project directory adjacent your source files, containing valid data entries
+                          // In this case, whitespace delimited integers.
+                          // The text file may be located elsewhere, but the command argument file path will need to be adjusted accordingly.
+   bool cinBCDTest = 0; // Done
+   bool OperatorPlusTestII = 0; // Done
+   bool OperatorMinusTest = 0; // Done
+   bool LimitBreakerTest = 0; // Done
+   bool OperatorMultiply = 0; // Not done
 
 
-   // Test of the BCD default constructor
+                              // Test of the BCD default constructor
    if (BCDConstructorDefaultTest == true) {
       cout << endl << "BCD Default Constructor test:" << endl;
       cout << "Insantiating BCD object... ";
@@ -151,8 +151,6 @@ int main() {
       target.remove(target.headptr->lessSDptr);
       cout << "Target condition (-): " << target << endl; // Expected -
       cout << "isLastNode()" << target.isLastNode(target.headptr) << endl << endl;
-      cout << "Head deleted == " << target.remove(target.headptr); // This line requires that remove() return something (such as a bool)
-      // Attempting to cout with a fully empty BCD will probably cause an exception.
    }
 
    // Test of BCD obliterate() method (a.k.a. clear() - renamed to avoid naming conflict with String method of same name)
@@ -197,19 +195,20 @@ int main() {
       cout << endl << "BCD Destructor test:" << endl;
       cout << "Note: No meaningful output is likely to be generated here. Use Valgrind." << endl;
       // To compile in Linux:
-      // g++ -std=c++11 PunchCard.cpp main.cpp
+      // g++ -std=c++11 *.cpp
 
       // To install Valgrind:
       // sudo apt install valgrind
 
       // To run Valgrind:
       // valgrind --leak-check=full <file path>/a.out
-      // valgring --leak-check=full --show-leak-kinds=all <file path>/a.out
+      // valgrind --leak-check=full --show-leak-kinds=all <file path>/a.out
+      // valgrind --leak-check=full --show-leak-kinds=all /home/Teabean/a.out
 
       BCD destructThis(24682468);
    } // Destructor (~BCD*()) gets called right here
 
-   // Test of the Less Than comparison operator
+     // Test of the Less Than comparison operator
    if (LessThanOperatorTest == true) {
       cout << endl << "Comparison operator < test:" << endl;
       BCD term1(1234);
@@ -269,7 +268,7 @@ int main() {
    // Test of Operator+ and Operator= overload
    if (PlusAndAssignTest == true) {
       cout << endl << "Operator+ and Operator= test:" << endl;
-      BCD term1(123); 
+      BCD term1(123);
       BCD term2(654);
       // cout << term1 << term2 << endl; // DEBUG
 
@@ -445,7 +444,7 @@ int main() {
    cout << n1 << " / " << n3 << " = " << quotient;
 
    cout << product << " has " << product.numDigits() << " digits" << endl;
-   
+
    */
 
    return (0);
