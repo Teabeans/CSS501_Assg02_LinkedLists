@@ -33,7 +33,7 @@ int main() {
    bool OperatorMinusTest = 1; // Done - No leaks
    bool LimitBreakerTest = 1; // Done - No leaks
    bool OperatorMultiply = 1; // Done - No leaks
-   bool OperatorDivide = 1;
+   bool OperatorDivide = 1; // Done - No leaks
 
 
                               // Test of the BCD default constructor
