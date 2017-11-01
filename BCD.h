@@ -169,27 +169,11 @@ public:
          lessSDptr(lessSigDigit) {
       }
 
-
-
       // Node constructor using another node - Creates a deep copy
       BCDnode(BCDnode* targetNodeptr) :
          // Begin copying fields
-         //         nodeName(targetNodeptr->nodeName),
-         data(0) // data(targetNodeptr->data)
-         //         borrow(targetNodeptr->borrow),
-         //         carry(targetNodeptr->carry),
-         //         moreSDptr(targetNodeptr->moreSDptr),
-         //         lessSDptr(targetNodeptr->lessSDptr)
-      {
-         nodeName = targetNodeptr->nodeName;
-         //            data(targetNodeptr->data),
-         //            borrow(targetNodeptr->borrow),
-         //            carry(targetNodeptr->carry),
-         //            moreSDptr(targetNodeptr->moreSDptr),
-         //            lessSDptr(targetNodeptr->lessSDptr)
-         // Field copies completed
-         cout << "Copies completed" << endl;
-         //New node exists with identical internal states
+         nodeName(targetNodeptr->nodeName),
+         data(targetNodeptr->data){
       }
    };
 
@@ -316,7 +300,7 @@ public:
    // Method returns a reference to the receiving object
    // LinkedList<ItemType>& operator=(const LinkedList<ItemType>& rightHandSide);
    // Must include BCD:: to make this a 'member function', otherwise it's global.
-   BCD& BCD::operator=(const BCD& someBCD);
+   BCD& operator=(const BCD& someBCD);
 
    // TODO: Comments
    // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a BCD object (right)
@@ -344,7 +328,7 @@ public:
    // Postconditions: A new BCD object exists representing the summed addition of the old BCD and received BCD.
    // Return value: A new BCD object representing the summed addition
    // Functions called: BCD::BCD(int) - Converts an int to a BCD object
-   friend const BCD BCD::operator+(BCD& term1BCD, BCD& term2BCD);
+   const BCD operator+(BCD& term2BCD);
 
 
    //TODO: Comments
