@@ -14,26 +14,25 @@ int main() {
    bool BCDRemoveTest = 1; // Done - No leaks
    bool BCDObliterateTest = 1; // Done - No leaks
    bool BCDConstructorBCDTest = 1; // Done - No leaks
-   bool BCDAssignmentOperatorTest = 0; // Done
-   bool LessThanOperatorTest = 0; // Done
+   bool BCDAssignmentOperatorTest = 1; // Done - No leaks
+   bool LessThanOperatorTest = 1; // Done - No leaks
+   bool DestructorTest = 1; // Done - No leaks
 
-   bool DestructorTest = 0; // Not done - Test in Valgrind
-
-   bool BCDIntAssignmentTest = 0; // Done
-   bool MagnitudeTest = 0; // Done
-   bool OperatorPlusTest = 0; // Done
-   bool PlusAndAssignTest = 0; // Done
-   bool cinDebugTest = 0; // Done - Confirm that the program can pull content in from cin.
+   bool BCDIntAssignmentTest = 1; // Done - No leaks
+   bool MagnitudeTest = 1; // Done - No leaks
+   bool OperatorPlusTest = 1; // Done - No leaks
+   bool PlusAndAssignTest = 1; // Done - No leaks
+   bool cinDebugTest = 1; // Done - Confirm that the program can pull content in from cin.
                           // In Visual Studio 2017, go to Debug > Project Properties... > Configuration Properties > Debugging > Command Arguments > Edit...
                           // Enter '< someTextFileName.txt' (sans single quotes)
                           // The above text file should be located in your project directory adjacent your source files, containing valid data entries
                           // In this case, whitespace delimited integers.
                           // The text file may be located elsewhere, but the command argument file path will need to be adjusted accordingly.
-   bool cinBCDTest = 0; // Done
-   bool OperatorPlusTestII = 0; // Done
-   bool OperatorMinusTest = 0; // Done
-   bool LimitBreakerTest = 0; // Done
-   bool OperatorMultiply = 0; // Not done
+   bool cinBCDTest = 1; // Done - No leaks
+   bool OperatorPlusTestII = 1; // Done - No leaks
+   bool OperatorMinusTest = 1; // Done - No leaks
+   bool LimitBreakerTest = 1; // Done - No leaks
+   bool OperatorMultiply = 1; // Not done
 
 
                               // Test of the BCD default constructor
@@ -338,6 +337,9 @@ int main() {
       cout << "Results sum3 (expect +99999): " << sum3 << endl;
       cout << "Results sum4 (expect -99999): " << sum4 << endl;
 
+      sum4 = sum4 + sum2;
+      cout << "Results sum4 + sum2 (expect -199998): " << sum4 << endl;
+
       cout << "Updating sums for negation..." << endl;
 
       sum1 = term1 + term3;
@@ -349,6 +351,9 @@ int main() {
       cout << "Results sum2 (expect +0): " << sum2 << endl;
       cout << "Results sum3 (expect +0): " << sum3 << endl;
       cout << "Results sum4 (expect +0): " << sum4 << endl;
+
+
+
    }
 
    // Test of Operator- overload
@@ -419,8 +424,42 @@ int main() {
    // Test of multiply operator
    if (OperatorMultiply == true) {
       cout << endl << "Multiplication test:" << endl;
-      BCD term1(123);
-      BCD term2(12);
+      // Set 0 - Zero case
+      // BCD term1(123);
+      // BCD term2(0);
+
+      // Set 1 - Confirm basic multiplication logic
+      // BCD term1(123);
+      // BCD term2(2);
+
+      // Set 2 - Confirm carry logic
+      // BCD term1(456);
+      // BCD term2(2);
+
+      // Set 3 - Confirm trailing-zero logic
+      // BCD term1(123);
+      // BCD term2(12);
+
+      // Set 4 - Confirm zero multiplication logic
+      // BCD term1(123);
+      // BCD term2(100);
+
+      // Set 5 - Confirm trailing-zero logic II
+      // BCD term1(1234);
+      // BCD term2(1111);
+
+      // Set 6 - Confirm trailing-zero logic II
+      // BCD term1(12345);
+      // BCD term2(12345);
+
+      // Set 7 - Exceeding intMaximum
+      // BCD term1(2140000000); // Cannot exceed intMax, else the original assignment from an int experiences overflow.
+      // BCD term2(25);
+
+      // Set 8 - Work or bust!
+       BCD term1(-1234567890); // Cannot exceed intMax, else the original assignment from an int experiences overflow.
+       BCD term2(1234567890);
+
       BCD product = term1 * term2;
       cout << "Product: " << product << endl;
    }
