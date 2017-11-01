@@ -5,7 +5,7 @@
 // Autumn 2017, Graduate Certificate in Software Design & Development (GCSDD)
 //
 // File Description:
-// This file is the header (definitions) of the Binary Coded Decimal (BCD, aka. "Big Ass Number") class.
+// This file is the header (definitions) of the Binary Coded Decimal (BCD, aka. "Very Big Number") class.
 //
 // Package files:
 // BCD.cpp
@@ -21,7 +21,7 @@
 // Template author:
 // Tim Lum (twhlum@gmail.com)
 //
-// License: (Note to student, the following is optional)
+// License:
 // This software is published under the GNU general license which guarantees
 // end users the freedom to run, study, share and modify the software.
 // https://www.gnu.org/licenses/gpl.html
@@ -97,7 +97,7 @@
 // nano <file name>.txt
 //
 // To compile in g++:
-// g++ -std=c++11 PunchCard.cpp main.cpp
+// g++ -std=c++11 *.cpp
 //
 // To run with test input:
 // ./a.out < TestInput.txt
@@ -119,49 +119,77 @@
 
 //Necessary to interact with 'cin' and 'cout' streams
 #include <iostream>
-#include <string> // Necessary for string operations
-
+// Necessary for string operations
+#include <string>
+// Methods not found in the current namespace are directed to check the 'std' namespace
 using namespace std;
 
-// Per pg. 273
-// class LinkedList : public li
+// ---- CLASS BCD ----
 class BCD {
    // --- PRIVATE REGION --- PRIVATE REGION --- PRIVATE REGION ---
 private:
-
-   // PRIVATE FIELDS:
-   // ---- FIELDS ----
-
+   // ---- PRIVATE FIELDS ----
 
    // length: For the head node only. Integer representing the node length of this BCD number ("1-2-3-4" has a length of "4")
    // Invariant information: Range is from 0 to the maximimum value of an int (2,147,483,647)
    int length;
 
    // isPositive: Represents whether this BCD object is positive or not
-   // Invariant information: 
+   // Invariant information: Range is from 0 to 1, where 0 represents 'false' (negative), and 1 represents 'true' (positive)
    bool isPositive;
 
    // PRIVATE METHODS:
+
+   // -None for this class-
 
    // --- PUBLIC REGION --- PUBLIC REGION --- PUBLIC REGION ---
 public:
 
    // PUBLIC FIELDS:
-   // BCDnode: Structure representing a BCDnode
-   // Invariant information:
-   struct BCDnode {
-      //Fields go here
-      string nodeName;
-      int data = 0;
-      int borrow = 0;
-      int carry = 0;
-      BCDnode* moreSDptr;
-      BCDnode* lessSDptr;
-      // Default node constructor
-      BCDnode() : nodeName("Head Node"), data(0), moreSDptr(nullptr), lessSDptr(nullptr) { }
-      // Post-condition: Node exists with no data, next and prev pointers do not indicate anything.
 
-      // Node constructor using a value and the pointers for its adjacent nodes
+   // #BCDnode: Structure representing a BCDnode
+   // Invariant information: Data field will always contain an integer value.
+   struct BCDnode {
+      //BCDnode fields:
+
+      // #nodeName - Name of the node. Used for debugging.
+      // Invariant information: None
+      string nodeName;
+
+      // #data - The numeric value that this node represents.
+      // Invariant information: From INT_MIN to INT_MAX, but logically should be from 0 to +9.
+      int data = 0;
+
+      // #borrow - Used if this node has passed values to a LessSignificantDigit.
+      // Invariant information: Valid range from 0 to INT_MAX.
+      int borrow = 0;
+
+      // #carry - Used if this node has received values from a LessSignificantDigit.
+      // Invariant information: Valid range from 0 to INT_MAX.
+      int carry = 0;
+
+      // #moreSDptr - A pointer to this node's MoreSignificantDigit.
+      // Invariant information: None
+      BCDnode* moreSDptr;
+      
+      // #lessSDptr - A pointer to this node's LessSignificantDigit.
+      // Invariant information: None
+      BCDnode* lessSDptr;
+
+      // #BCDnode() - Default node constructor
+      // Parameters: None
+      // Preconditions: None
+      // Postconditions: A BCDnode exists with an internal state representing "0". "Next" and "Prev" pointers are to nullptr.
+      // Return value: None
+      // Functions called: None
+      BCDnode() : nodeName("Head Node"), data(0), moreSDptr(nullptr), lessSDptr(nullptr) { }
+
+      // #BCDnode(int, ptr, ptr) - Node constructor using a value and the pointers for its adjacent nodes.
+      // Parameters: None
+      // Preconditions: None
+      // Postconditions: A BCDnode exists with an internal state representing the received value. Its "Next" and "Prev" pointers are to the MoreSignificantDigit and LessSignificantDigit nodes.
+      // Return value: None
+      // Functions called: None
       BCDnode(int someData, BCDnode* moreSigDigit, BCDnode* lessSigDigit) :
          nodeName("Body Node"),
          data(someData),
@@ -169,22 +197,29 @@ public:
          lessSDptr(lessSigDigit) {
       }
 
-      // Node constructor using another node - Creates a deep copy
+      // #BCDnode(nodeptr) - Constructor using another node - Creates a deep copy
+      // Parameters: None
+      // Preconditions: The received target pointer must indicate a valid BCDnode.
+      // Postconditions: A BCDnode exists with an internal state representing the received value. Its "Next" and "Prev" pointers remain null.
+      // Return value: None
+      // Functions called: None
       BCDnode(BCDnode* targetNodeptr) :
-         // Begin copying fields
+         // Copy relevant fields
          nodeName(targetNodeptr->nodeName),
          data(targetNodeptr->data){
       }
-   };
 
-   // headptr: Pointer to the head BCDnode
-   // Invariant information:
+   }; // End BCDnode struct
+
+   // #headptr - Pointer to the head BCDnode
+   // Invariant information: Headptr always exists, though the head node itself may be deleted.
    BCDnode* headptr;
 
    // PUBLIC METHODS:
 
    // ---- CONSTRUCTORS ----
-   // BCD() - Default constructor.
+
+   // #BCD() - Default constructor.
    // Parameters: None
    // Preconditions: None
    // Postconditions: A BCD object exists with an internal state representing "0"
@@ -192,31 +227,41 @@ public:
    // Functions called: None
    BCD();
 
-   // BCD(int) - Integer constructor.
-   // Parameters: None
+   // #BCD(int) - Integer constructor.
+   // Parameters: temp - Integer holder used for manipulations near the INT_MAX/MIN overflow limit
    // Preconditions: None
    // Postconditions: A BCD object exists with an internal state representing the integer passed to it
    // Return value: None
-   // Functions called: None
+   // Functions called: insertMSD(), BCDnode() constructors
    BCD(int someInt);
 
-   // BCD(BCD&) - Deep copy constructor
+   // #BCD(BCD&) - Deep copy constructor- Page 246
    // Parameters: None
-   // Preconditions: None
-   // Postconditions: A BCD object is created with an internal state identical to but distinct from the received BCD argument.
+   // Preconditions: A valid BCD object exists.
+   // Postconditions: A BCD object is created with an internal state representing, but distinct from, the received BCD argument.
    // Return value: None
-   // Functions called: None
+   // Functions called: insertMSD(), BCDnode() constructors
    BCD(const BCD& someBCD);
 
-   // const <return type> <method name>( <arguments> );
-   // e.g. const bool checkIfLastCard();
+   // ---- METHODS ----
 
-   // TODO: Comments
-   // #obliterate()
+   // const <return type> <method name>( <arguments> );
+   // e.g. const bool checkIfLastCard(someClass& someArg);
+
+   // #obliterate() - Deletes all nodes connected to the calling BCD's headptr node.
+   // Parameters: None
+   // Preconditions: A valid BCD object exists with a valid head node.
+   // Postconditions: All dynamically allocated memory attached to the head node is deallocated. The head node still exists.
+   // Return value: None
+   // Functions called: remove()
    void obliterate();
 
-   // TODO: Comments
-   // #remove()
+   // #remove() - Deletes the target node
+   // Parameters: None
+   // Preconditions: A valid target node has been passed to this method
+   // Postconditions: Dynamically allocated memory used by the node is deallocated.
+   // Return value: bool - True if successful.
+   // Functions called: None
    bool remove(BCDnode* target);
 
    // TODO: Comments
@@ -275,50 +320,62 @@ public:
    //#deepcopy()
    void const deepcopy(const BCD& target);
 
-   // TODO: Comments
+   // #int() - Custom behavior for the BCD to int conversion operator
+   // Parameters: overflowInt - Higher capacity integer used to check from intMax to 999,999,999.
+   // Preconditions: A BCD object exists with a valid numeric representation.
+   // Postconditions: An int representation of the BCD number between (2^31)-1 and (-)(2^31) has been returned OR an 'out_of_range' error has been thrown.
+   // Return value: returnInt - Variable storing the value of the BCD integer.
+   // Functions called: None
    operator int() const;
 
-   // TODO: Comments
+   // #operator< - Custom behavior for the less-than operator when dealing with a BCD object (left) and a BCD object (right)
+   // Parameters: currT1 and currT2 - Pointers to the current node being used for comparison
+   // Preconditions: Two valid BCD objects exist and are being compared
+   // Postconditions: None
+   // Return value: Boolean - True if the Left-Hand Term (LHT) is 'less than' the Right-Hand Term (RHT), false if not.
+   // Functions called: numDigits() - For the length of the BCD object.
    // Per pg. 436 - Modeled after operator== overload
    // bool operator<(const LinkedList<ItemType>& rightHandSide) const;
    bool operator<(const BCD& someBCD) const;
 
-   // TODO: Comments
+   // #operator== - Custom behavior for the equality operator when dealing with a BCD object (left) and a BCD object (right)
+   // Parameters: currT1 and currT2 - Pointers to the current node being used for comparison
+   // Preconditions: None
+   // Postconditions: None
+   // Return value: Boolean - True if BCDs being compared are the 'same', false if not.
+   // Functions called: numDigits() - For the length of the BCD object.
    // Per pg. 436
    // bool operator==(const LinkedList<ItemType>& rightHandSide) const;
    bool operator==(const BCD& someBCD) const;
 
-   // TODO: Comments
+
+   // #operator= - Custom behavior for the assignment operator when dealing with a BCD object (left, implied) and a BCD object (right)
+   // Parameters: None
+   // Preconditions: Two valid BCD objects exist
+   // Postconditions: The LeftHandSide BCD linked list has been replaced with a new linked list reflecting the values of the RightHandSide argument
+   // Return value: *this, a pointer to the LeftHandSide argument
+   // Functions called: obliterate(), deepcopy()
    // Per pg. 438
-   // #operator=
-   // = - Custom behavior for the assignment operator when dealing with a BCD object (left) and a BCD object (right)
-   // Parameters: 
-   // Preconditions: 
-   // Postconditions: 
-   // Return value: 
-   // Functions called: 
-   // Method returns a reference to the receiving object
    // LinkedList<ItemType>& operator=(const LinkedList<ItemType>& rightHandSide);
    // Must include BCD:: to make this a 'member function', otherwise it's global.
    BCD& operator=(const BCD& someBCD);
 
-   // TODO: Comments
-   // >> - Custom behavior for the insertion operator when dealing with an istream object (left) and a BCD object (right)
-   // Parameters: 
-   // Preconditions: 
-   // Postconditions: 
-   // Return value: 
-   // Functions called: 
+   // #operator>> - Custom behavior for the insertion operator when dealing with an istream object (left) and a BCD object (right)
+   // Parameters: numberBank - Used to store single int values from cin.
+   // Preconditions: Content must be loaded to cin, terminated by newline characters. A valid BCD object must already exist.
+   // Postconditions: The existing BCD object's internal nodes now represent the integer pulled from cin
+   // Return value: cinData - An istream object.
+   // Functions called: None
    // If it's in the class definition, include 'friend'
    friend istream& operator>>(istream& cinData, BCD& someBCD);
-   //     inputStream (by reference) operator-named->> ( <left argument type>(by reference) <left argument name>, <right argument type>(by reference) <right argument name>);
+   // inputStream (by reference) operator-named->> ( <left argument type>(by reference) <left argument name>, <right argument type>(by reference) <right argument name>);
 
-   // << - Custom behavior for the extraction operator when dealing with an ostream object (left) and a BCD object (right)
-   // Parameters: thisNumber - Used to store successive digits to be sent to 'cout'.
+   // #operator<< - Custom behavior for the extraction operator when dealing with an ostream object (left) and a BCD object (right)
+   // Parameters: thisBCDNumber - Used to store successive digits to be sent to 'cout'.
    // Preconditions: None
    // Postconditions: String representation of the BCD object will be sent to 'cout'.
    // Return value: None
-   // Functions called: BCD::toString() - Converts BCD digits to a string object.
+   // Functions called: toString() - Converts BCD digits to a string object.
    // If it's in the class definition, include 'friend'
    friend ostream& operator<<(ostream& coutStream, BCD& someBCD);
 
@@ -344,6 +401,14 @@ public:
    //   friend const BCD& operator=(const BCD& someBCD);
 
    // ---- DESTRUCTORS -----
+
+   // TODO: AFTER SUBMITTAL: Relocate destructor to location directly after constructors.
+   // #~BCD() - Destructor - Deletes all dynamically allocated memory associated with a BCD object. Page 245-246
+   // Parameters: None
+   // Preconditions: A valid BCD object exists with a valid head node.
+   // Postconditions: All dynamically allocated memory attached to the head node is deallocated.
+   // Return value: None
+   // Functions called: obliterate()
    ~BCD();
 
-}; // Closing 'class BCD'
+}; // Closing class 'BCD'
